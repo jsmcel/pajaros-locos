@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="Construye tu propio nivel de pájaros y cerditos, y luego juégalo. Para peques de 6 años.">
+<meta name="theme-color" content="#7ec8f0">
+<link rel="manifest" href="manifest.json">
+<title>Pájaros Locos — Construye tu nivel</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{
+    font-family:"Comic Sans MS","Baloo 2",Verdana,system-ui,sans-serif;
+    background:#5bb3e0;color:#3a2c1a;
+    user-select:none;-webkit-user-select:none;touch-action:none;
+  }
+  #app{display:flex;flex-direction:column;height:100%;width:100%}
+
+  /* ---------- barra de arriba ---------- */
+  header{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:6px 10px;
+    background:linear-gradient(#ffd85e,#ffb524);
+    border-bottom:5px solid #c9800f;box-shadow:0 3px 10px rgba(0,0,0,.25);z-index:5;
+  }
+  .logo{font-size:clamp(15px,2.4vw,26px);font-weight:900;color:#7a3d00;
+        text-shadow:2px 2px 0 #fff5cc;white-space:nowrap;letter-spacing:.5px}
+  .logo small{display:block;font-size:.55em;font-weight:700;opacity:.8}
+  .spacer{flex:1}
+
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+  .modos{display:flex;gap:8px}
+  .modo{
+    font-size:clamp(14px,2vw,22px);font-weight:900;color:#5a3a12;
+    background:#fff3d0;border:4px solid #b8791d;border-radius:16px;
+    padding:8px 16px;box-shadow:0 4px 0 #b8791d;transition:transform .08s;
+    white-space:nowrap;
+  }
+  .modo:active{transform:translateY(3px);box-shadow:0 1px 0 #b8791d}
+  .modo.on{background:#6fd45c;color:#0d3d06;border-color:#2e7a20;box-shadow:0 4px 0 #2e7a20}
+
+  .mini{
+    font-size:clamp(18px,2.4vw,26px);background:#fff3d0;border:4px solid #b8791d;
+    border-radius:14px;width:clamp(44px,6vw,58px);height:clamp(44px,6vw,58px);
+    box-shadow:0 4px 0 #b8791d;line-height:1;
+  }
+  .mini:active{transform:translateY(3px);box-shadow:0 1px 0 #b8791d}
+
+  /* ---------- escenario ---------- */
+  #stage{flex:1 1 auto;position:relative;background:#5bb3e0;min-height:0}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+
+  /* ---------- barra de abajo ---------- */
+  footer{
+    flex:0 0 auto;background:linear-gradient(#8a5a2b,#6b4420);
+    border-top:5px solid #4d3016;padding:8px 10px;z-index:5;
+    box-shadow:0 -3px 10px rgba(0,0,0,.25);
+  }
+  .fila{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+
+  .pieza{
+    background:#ffe9b8;border:4px solid #a86b1e;border-radius:16px;
+    padding:5px 8px 4px;min-width:clamp(62px,8.4vw,96px);
+    display:flex;flex-direction:column;align-items:center;gap:1px;
+    box-shadow:0 4px 0 #7d4c12;transition:transform .1s;
+  }
+  .pieza .em{font-size:clamp(24px,3.6vw,38px);line-height:1.05}
+  .pieza .tx{font-size:clamp(10px,1.3vw,14px);font-weight:900;color:#6b3d06}
+  .pieza:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
+  .pieza.on{background:#8ff07c;border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b;transform:translateY(-3px)}
+
+  .sep{width:4px;align-self:stretch;background:rgba(255,255,255,.25);border-radius:4px;margin:0 4px}
+
+  /* marcador de juego */
+  .marcador{display:flex;align-items:center;gap:clamp(10px,2vw,26px);justify-content:center;flex-wrap:wrap}
+  .caja-marcador{
+    background:#ffe9b8;border:4px solid #a86b1e;border-radius:16px;padding:5px 14px;
+    display:flex;align-items:center;gap:8px;box-shadow:0 4px 0 #7d4c12;
+  }
+  .caja-marcador .et{font-size:clamp(11px,1.4vw,16px);font-weight:900;color:#6b3d06}
+  .caja-marcador .val{font-size:clamp(19px,2.8vw,30px);letter-spacing:-2px;line-height:1}
+
+  /* ---------- ventanas ---------- */
+  .capa{
+    position:absolute;inset:0;display:none;place-items:center;
+    background:rgba(20,10,0,.55);backdrop-filter:blur(3px);z-index:10;padding:14px;
+  }
+  .capa.on{display:grid}
+  .panel{
+    background:linear-gradient(#fff8e2,#ffe9b8);border:7px solid #a86b1e;border-radius:26px;
+    padding:clamp(14px,3vw,30px);text-align:center;max-width:min(620px,94vw);
+    max-height:92%;overflow:auto;box-shadow:0 12px 0 #7d4c12,0 20px 44px rgba(0,0,0,.45);
+    animation:pop .32s cubic-bezier(.2,1.5,.4,1);
+  }
+  @keyframes pop{from{transform:scale(.5) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+  .panel h2{font-size:clamp(24px,5vw,44px);color:#c94a00;text-shadow:2px 2px 0 #fff;margin-bottom:6px}
+  .panel p{font-size:clamp(14px,2.2vw,20px);font-weight:700;color:#5a3a12;margin:8px 0;line-height:1.5}
+  .estrellas{font-size:clamp(34px,8vw,64px);letter-spacing:6px;margin:6px 0}
+  .grande{
+    font-size:clamp(16px,2.6vw,24px);font-weight:900;color:#0d3d06;background:#6fd45c;
+    border:5px solid #2e7a20;border-radius:20px;padding:12px 22px;margin:6px;
+    box-shadow:0 6px 0 #2e7a20;display:inline-block;
+  }
+  .grande.azul{background:#68c8f5;border-color:#1b6d97;color:#04324a;box-shadow:0 6px 0 #1b6d97}
+  .grande:active{transform:translateY(4px);box-shadow:0 2px 0 #2e7a20}
+  .pasos{text-align:left;display:inline-block;margin:6px auto}
+  .pasos li{font-size:clamp(14px,2.2vw,20px);font-weight:700;color:#5a3a12;margin:10px 0;list-style:none}
+  .pasos li b{font-size:1.25em}
+
+  /* ---------- taller de pájaros (foto) ---------- */
+  .oculto{display:none !important}
+  #lienzoPrevio{
+    width:min(300px,68vw);height:min(300px,68vw);border-radius:24px;
+    background:linear-gradient(#8fd8ff,#dff3fb);border:5px solid #a86b1e;
+    display:block;margin:8px auto;box-shadow:inset 0 4px 14px rgba(0,0,0,.18);
+  }
+  .galeria{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+  .tarjeta{
+    position:relative;width:82px;height:82px;border-radius:18px;background:#bfe6fa;
+    border:5px solid #a86b1e;box-shadow:0 4px 0 #7d4c12;display:grid;place-items:center;
+    overflow:visible;padding:0;
+  }
+  .tarjeta img{width:88%;height:88%;object-fit:contain;pointer-events:none}
+  .tarjeta.on{border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b;transform:translateY(-3px)}
+  .tarjeta .x{
+    position:absolute;top:-10px;right:-10px;width:28px;height:28px;border-radius:50%;
+    background:#ff5252;color:#fff;font-weight:900;font-size:15px;border:3px solid #fff;
+    display:grid;place-items:center;line-height:1;padding:0;
+  }
+  .ajuste{display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0;flex-wrap:wrap}
+  .ajuste button{
+    background:#ffe9b8;border:4px solid #a86b1e;border-radius:14px;padding:7px 13px;
+    font-weight:900;font-size:clamp(12px,1.9vw,16px);color:#6b3d06;box-shadow:0 4px 0 #7d4c12;
+  }
+  .ajuste button:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
+  .consejo{font-size:clamp(11px,1.7vw,15px);color:#7a5a2a;font-weight:700}
+
+  /* aviso flotante */
+  #aviso{
+    position:absolute;left:50%;top:14px;transform:translate(-50%,-140%);
+    background:#ff5252;color:#fff;font-weight:900;font-size:clamp(14px,2.2vw,20px);
+    padding:10px 20px;border-radius:16px;border:4px solid #fff;
+    box-shadow:0 6px 16px rgba(0,0,0,.4);z-index:9;transition:transform .3s;white-space:nowrap;
+  }
+  #aviso.on{transform:translate(-50%,0)}
+
+  @media (max-height:560px){
+    .pieza .tx{display:none}
+    .pieza{min-width:54px;padding:4px 6px}
+    .logo small{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="logo">🐦 PÁJAROS LOCOS<small>construye y juega</small></div>
+    <div class="spacer"></div>
+    <div class="modos">
+      <button class="modo on" id="btnConstruir">🔨 CONSTRUIR</button>
+      <button class="modo" id="btnJugar">🚀 ¡JUGAR!</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="modo" id="btnTaller" title="Convierte tu dibujo en pájaro">📷 MI PÁJARO</button>
+    <button class="mini" id="btnAyuda" title="Ayuda">❓</button>
+    <button class="mini" id="btnSonido" title="Sonido">🔊</button>
+  </header>
+
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="aviso"></div>
+
+    <div class="capa" id="capaFin">
+      <div class="panel">
+        <h2 id="finTitulo">¡BIEN HECHO!</h2>
+        <div class="estrellas" id="finEstrellas">⭐⭐⭐</div>
+        <p id="finTexto">Has ganado</p>
+        <button class="grande" id="finOtra">🔄 Otra vez</button>
+        <button class="grande azul" id="finConstruir">🔨 Construir</button>
+      </div>
+    </div>
+
+    <div class="capa" id="capaAyuda">
+      <div class="panel">
+        <h2>¿Cómo se juega?</h2>
+        <ul class="pasos">
+          <li><b>1️⃣ 🔨</b> Toca una pieza de abajo y luego toca el cielo para ponerla.</li>
+          <li><b>2️⃣ 🐷</b> ¡No olvides poner cerditos! Son los malos.</li>
+          <li><b>3️⃣ 🚀</b> Pulsa <b>¡JUGAR!</b>, estira el pájaro hacia atrás y suéltalo.</li>
+          <li><b>4️⃣ 🏆</b> Tira todos los cerditos y… ¡has ganado!</li>
+        </ul>
+        <p>🧽 = borrar &nbsp; ↩️ = deshacer &nbsp; 🎲 = ejemplo</p>
+        <p>📷 <b>MI PÁJARO</b>: ¡haz un dibujo en un papel, sácale una foto y volará!</p>
+        <p id="lineaApk" class="oculto"><a href="https://github.com/jsmcel/pajaros-locos/releases/latest" target="_blank" rel="noopener" style="color:#1b6d97;font-weight:900">📱 Descargar la app para Android (APK)</a></p>
+        <button class="grande" id="ayudaOk">¡VALE!</button>
+      </div>
+    </div>
+
+    <div class="capa" id="capaTaller">
+      <div class="panel">
+        <h2>📷 Mi pájaro dibujado</h2>
+
+        <div id="tallerPaso1">
+          <p>Dibuja un pájaro en un papel blanco 🖍️<br>y hazle una foto.</p>
+          <button class="grande" id="btnCamara">📸 HACER FOTO</button>
+          <button class="grande azul" id="btnGaleria">🖼️ ELEGIR FOTO</button>
+          <p class="consejo">Consejo: papel blanco, buena luz y sin sombras 💡</p>
+        </div>
+
+        <div id="tallerPaso2" class="oculto">
+          <canvas id="lienzoPrevio" width="300" height="300"></canvas>
+          <div class="ajuste">
+            <button id="btnMenosFondo">🎨 Menos fondo</button>
+            <button id="btnMasFondo">✂️ Más fondo</button>
+          </div>
+          <p class="consejo">¿Se ve bien tu dibujo? Ajusta y guárdalo.</p>
+          <button class="grande" id="btnGuardarPajaro">✅ ¡ES MI PÁJARO!</button>
+          <button class="grande azul" id="btnOtraFoto">📸 Otra foto</button>
+        </div>
+
+        <p style="margin-top:14px">Mis pájaros:</p>
+        <div class="galeria" id="galeria"></div>
+
+        <button class="grande azul" id="tallerCerrar">👍 LISTO</button>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="inpCamara" accept="image/*" capture="environment" style="display:none">
+  <input type="file" id="inpGaleria" accept="image/*" style="display:none">
+
+  <footer>
+    <div class="fila" id="barraConstruir"></div>
+    <div class="fila marcador" id="barraJugar" style="display:none">
+      <div class="caja-marcador"><span class="et">Pájaros</span><span class="val" id="marBirds">🐦🐦🐦</span></div>
+      <div class="caja-marcador"><span class="et">Cerditos</span><span class="val" id="marPigs">🐷 3</span></div>
+      <button class="pieza" id="btnOtra"><span class="em">🔄</span><span class="tx">OTRA VEZ</span></button>
+    </div>
+  </footer>
+
+</div>
+
+<script src="matter.min.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   PÁJAROS LOCOS — editor + juego estilo Angry Birds
+   Mundo virtual fijo de 1600x900 escalado al tamaño del canvas.
+   ============================================================ */
+const { Engine, Bodies, Body, Composite, Events } = Matter;
+
+const W = 1600, H = 900, SUELO = 800;
+const REJILLA = 20;                    // imán de colocación
+const SLING = { x: 265, y: 800 };      // base del tirachinas
+const HORQ  = { x: 265, y: 622 };      // horquilla (donde descansa el pájaro)
+const ESTIRA_MAX = 150;                // cuánto se puede estirar
+const VEL_MAX = 37;                    // velocidad máxima de lanzamiento
+const PAJAROS_TOTAL = 5;
+const ZONA_X = 430;                    // no se puede construir a la izquierda de aquí
+
+/* ---------- tipos de pieza ---------- */
+const TIPOS = {
+  pig:    { forma:'circ', r:34,          hp:14, dens:0.0012, emoji:'🐷', nombre:'Cerdito'  },
+  wood:   { forma:'rect', w:80,  h:80,   hp:34, dens:0.0016, emoji:'📦', nombre:'Caja'     },
+  beam:   { forma:'rect', w:180, h:36,   hp:30, dens:0.0016, emoji:'🪵', nombre:'Viga'     },
+  column: { forma:'rect', w:36,  h:180,  hp:30, dens:0.0016, emoji:'🏛️', nombre:'Columna'  },
+  ice:    { forma:'rect', w:80,  h:80,   hp:13, dens:0.0010, emoji:'🧊', nombre:'Hielo'    },
+  stone:  { forma:'rect', w:80,  h:80,   hp:95, dens:0.0035, emoji:'🧱', nombre:'Piedra'   },
+  tnt:    { forma:'rect', w:64,  h:64,   hp:6,  dens:0.0015, emoji:'💣', nombre:'TNT'      },
+};
+const ORDEN = ['pig','wood','beam','column','ice','stone','tnt'];
+
+/* ---------- estado global ---------- */
+const S = {
+  modo: 'construir',
+  piezas: [],            // [{t,x,y}]  ← el nivel del niño (nunca lo toca la física)
+  herramienta: 'pig',
+  historial: [],
+  arrastrando: null,     // pieza que se está moviendo en modo construir
+  raton: null,
+  mudo: false,
+  // juego
+  motor: null, cuerpos: [], particulas: [], pajaro: null,
+  pajarosUsados: 0, tirando: false, aim: null, quietoDesde: 0, calma: 0, finPuesto: false,
+  sacudida: 0, tiempo: 0,
+};
+
+/* pájaros dibujados por el niño (fotos convertidas) */
+const MI = { img:null, lista:[], sel:-1, fuente:null, temp:null, umbral:62 };
+
+/* ============================================================
+   NIVELES DE EJEMPLO
+   ============================================================ */
+const EJEMPLOS = [
+  [ {t:'column',x:1000,y:710},{t:'column',x:1160,y:710},{t:'beam',x:1080,y:602},{t:'pig',x:1080,y:550} ],
+  [ {t:'column',x:900,y:710},{t:'column',x:1060,y:710},{t:'beam',x:980,y:602},
+    {t:'wood',x:980,y:544},{t:'pig',x:980,y:470},
+    {t:'column',x:1240,y:710},{t:'column',x:1400,y:710},{t:'beam',x:1320,y:602},{t:'pig',x:1320,y:550},
+    {t:'ice',x:1120,y:760} ],
+  [ {t:'stone',x:760,y:760},{t:'stone',x:840,y:760},{t:'beam',x:800,y:702},{t:'pig',x:800,y:650},
+    {t:'tnt',x:1000,y:768},
+    {t:'column',x:1150,y:710},{t:'column',x:1310,y:710},{t:'beam',x:1230,y:602},
+    {t:'ice',x:1230,y:544},{t:'pig',x:1230,y:470} ],
+];
+let ejemploN = 0;
+
+/* ============================================================
+   SONIDO (sintetizado, sin archivos)
+   ============================================================ */
+let actx = null;
+function ac(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function tono(f1,f2,dur,tipo,vol){
+  if(S.mudo) return; const a=ac(); if(!a) return;
+  const o=a.createOscillator(), g=a.createGain();
+  o.type=tipo||'sine'; o.frequency.setValueAtTime(f1,a.currentTime);
+  if(f2) o.frequency.exponentialRampToValueAtTime(Math.max(30,f2),a.currentTime+dur);
+  g.gain.setValueAtTime(vol||0.18,a.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur);
+}
+function ruido(dur,vol,filtro){
+  if(S.mudo) return; const a=ac(); if(!a) return;
+  const n=Math.floor(a.sampleRate*dur), b=a.createBuffer(1,n,a.sampleRate), d=b.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+  const s=a.createBufferSource(); s.buffer=b;
+  const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=filtro||900;
+  const g=a.createGain(); g.gain.value=vol||0.25;
+  s.connect(f); f.connect(g); g.connect(a.destination); s.start();
+}
+const SFX = {
+  clic:  ()=>tono(700,900,.07,'square',.10),
+  poner: ()=>tono(400,760,.12,'triangle',.16),
+  borrar:()=>tono(500,180,.14,'sawtooth',.12),
+  estira:()=>tono(200,340,.10,'sine',.07),
+  lanza: ()=>{ tono(300,900,.22,'sine',.16); ruido(.18,.12,1600); },
+  golpe: ()=>ruido(.12,.28,600),
+  rompe: ()=>{ ruido(.22,.32,2200); tono(500,120,.2,'square',.10); },
+  cerdo: ()=>{ tono(900,1500,.10,'sine',.22); tono(1500,300,.16,'triangle',.16); },
+  boom:  ()=>{ ruido(.55,.5,300); tono(120,40,.5,'sawtooth',.28); },
+  gana:  ()=>{ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tono(f,f*1.5,.28,'triangle',.20),i*130)); },
+  falla: ()=>{ [400,330,260].forEach((f,i)=>setTimeout(()=>tono(f,f*.8,.24,'sine',.16),i*150)); },
+};
+
+/* ============================================================
+   CANVAS Y ESCALADO
+   ============================================================ */
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const vista = { esc:1, ox:0, oy:0 };
+function medir(){
+  const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
+  cv.width = Math.max(1,Math.round(r.width*dpr));
+  cv.height= Math.max(1,Math.round(r.height*dpr));
+  const e = Math.min(cv.width/W, cv.height/H);
+  vista.esc = e; vista.ox = (cv.width-W*e)/2; vista.oy = (cv.height-H*e)/2;
+}
+window.addEventListener('resize', medir);
+function aMundo(ev){
+  const r = cv.getBoundingClientRect(), dpr = cv.width/r.width;
+  return { x:((ev.clientX-r.left)*dpr - vista.ox)/vista.esc,
+           y:((ev.clientY-r.top )*dpr - vista.oy)/vista.esc };
+}
+
+/* ============================================================
+   DIBUJO
+   ============================================================ */
+const nubes = [{x:250,y:130,s:1.2},{x:820,y:90,s:.9},{x:1320,y:170,s:1.1},{x:1080,y:250,s:.7}];
+
+function fondo(){
+  const g = ctx.createLinearGradient(0,0,0,SUELO);
+  g.addColorStop(0,'#5fb8ea'); g.addColorStop(.6,'#a8ddf5'); g.addColorStop(1,'#dff3fb');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,SUELO+4);
+  // sol
+  ctx.save(); ctx.translate(1430,110);
+  ctx.fillStyle='rgba(255,240,150,.35)'; ctx.beginPath(); ctx.arc(0,0,96,0,7); ctx.fill();
+  ctx.fillStyle='#ffdf4d'; ctx.beginPath(); ctx.arc(0,0,58,0,7); ctx.fill();
+  ctx.strokeStyle='#f5b301'; ctx.lineWidth=6;
+  for(let i=0;i<10;i++){ const a=i*Math.PI/5 + S.tiempo*0.004;
+    ctx.beginPath(); ctx.moveTo(Math.cos(a)*68,Math.sin(a)*68); ctx.lineTo(Math.cos(a)*88,Math.sin(a)*88); ctx.stroke(); }
+  ctx.restore();
+  // nubes
+  ctx.fillStyle='rgba(255,255,255,.92)';
+  nubes.forEach(n=>{
+    const x = ((n.x + S.tiempo*0.16*n.s) % (W+320)) - 160;
+    ctx.save(); ctx.translate(x,n.y); ctx.scale(n.s,n.s);
+    [[0,0,46],[42,8,34],[-44,10,32],[16,-24,30],[-18,-20,26]].forEach(c=>{
+      ctx.beginPath(); ctx.arc(c[0],c[1],c[2],0,7); ctx.fill(); });
+    ctx.restore();
+  });
+  // colinas
+  ctx.fillStyle='#8fd97a';
+  ctx.beginPath(); ctx.moveTo(0,SUELO);
+  ctx.quadraticCurveTo(230,600,470,SUELO); ctx.quadraticCurveTo(760,590,1080,SUELO);
+  ctx.quadraticCurveTo(1360,620,1600,SUELO); ctx.lineTo(1600,SUELO); ctx.closePath(); ctx.fill();
+}
+
+function suelo(){
+  ctx.fillStyle='#a06b32'; ctx.fillRect(0,SUELO,W,H-SUELO);
+  ctx.fillStyle='#8a5a2b';
+  for(let i=0;i<70;i++){ const x=(i*97)%W, y=SUELO+26+((i*53)%70);
+    ctx.beginPath(); ctx.ellipse(x,y,13,7,0,0,7); ctx.fill(); }
+  ctx.fillStyle='#5fbe36'; ctx.fillRect(0,SUELO,W,20);
+  ctx.fillStyle='#79d94c';
+  for(let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,SUELO);
+    ctx.quadraticCurveTo(x+6,SUELO-15,x+13,SUELO); ctx.fill(); }
+}
+
+function tirachinas(atras){
+  ctx.save(); ctx.translate(SLING.x,SLING.y);
+  ctx.fillStyle = atras ? '#6b4420' : '#8a5a2b';
+  ctx.beginPath(); ctx.moveTo(-17,0); ctx.lineTo(-11,-118); ctx.lineTo(11,-118); ctx.lineTo(17,0); ctx.closePath(); ctx.fill();
+  ctx.lineWidth=20; ctx.lineCap='round'; ctx.strokeStyle=ctx.fillStyle;
+  ctx.beginPath(); ctx.moveTo(-8,-112); ctx.lineTo(-40,-178); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( 8,-112); ctx.lineTo( 40,-178); ctx.stroke();
+  ctx.restore();
+}
+
+function gomas(px,py){
+  ctx.strokeStyle='#4a2c12'; ctx.lineWidth=11; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(SLING.x-40,SLING.y-178); ctx.lineTo(px,py); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(SLING.x+40,SLING.y-178); ctx.lineTo(px,py); ctx.stroke();
+}
+
+function pajaro(x,y,ang,r){
+  r = r||26;
+  // si el niño ha hecho su propio pájaro con una foto, lo usamos
+  if(MI.img && MI.img.complete && MI.img.naturalWidth){
+    const im=MI.img, lado=r*2.75, k=Math.min(lado/im.naturalWidth, lado/im.naturalHeight);
+    const w=im.naturalWidth*k, h=im.naturalHeight*k;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+    ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); return;
+  }
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+  // cola
+  ctx.fillStyle='#8f1414';
+  ctx.beginPath(); ctx.moveTo(-r*.7,0); ctx.lineTo(-r*1.85,-r*.55); ctx.lineTo(-r*1.7,r*.2); ctx.closePath(); ctx.fill();
+  // cuerpo
+  ctx.fillStyle='#e0322a'; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
+  ctx.fillStyle='#f8d0a0'; ctx.beginPath(); ctx.ellipse(r*.12,r*.42,r*.55,r*.4,0,0,7); ctx.fill();
+  ctx.strokeStyle='#8f1414'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.stroke();
+  // ojos
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.ellipse(r*.22,-r*.24,r*.30,r*.34,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(r*.72,-r*.20,r*.24,r*.30,0,0,7); ctx.fill();
+  ctx.fillStyle='#221';
+  ctx.beginPath(); ctx.arc(r*.30,-r*.22,r*.13,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(r*.74,-r*.18,r*.11,0,7); ctx.fill();
+  // cejas enfadadas
+  ctx.strokeStyle='#2b1206'; ctx.lineWidth=r*.20; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-r*.10,-r*.68); ctx.lineTo(r*.46,-r*.44); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( r*.98,-r*.56); ctx.lineTo(r*.60,-r*.42); ctx.stroke();
+  // pico
+  ctx.fillStyle='#ffa41c';
+  ctx.beginPath(); ctx.moveTo(r*.66,r*.05); ctx.lineTo(r*1.34,r*.20); ctx.lineTo(r*.66,r*.40); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#d97b00'; ctx.lineWidth=1.6; ctx.stroke();
+  ctx.restore();
+}
+
+function cerdito(x,y,ang,r,dano){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+  ctx.fillStyle='#5fbe36'; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
+  // orejas
+  ctx.beginPath(); ctx.moveTo(-r*.62,-r*.66); ctx.lineTo(-r*.28,-r*1.12); ctx.lineTo(-r*.08,-r*.74); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo( r*.62,-r*.66); ctx.lineTo( r*.28,-r*1.12); ctx.lineTo( r*.08,-r*.74); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#7fd854'; ctx.beginPath(); ctx.ellipse(0,r*.12,r*.72,r*.6,0,0,7); ctx.fill();
+  ctx.strokeStyle='#3d8f1c'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.stroke();
+  // ojos
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(-r*.32,-r*.24,r*.24,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc( r*.32,-r*.24,r*.24,0,7); ctx.fill();
+  ctx.fillStyle='#221';
+  ctx.beginPath(); ctx.arc(-r*.28,-r*.22,r*.11,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc( r*.36,-r*.22,r*.11,0,7); ctx.fill();
+  // morro
+  ctx.fillStyle='#4aa32a'; ctx.beginPath(); ctx.ellipse(0,r*.30,r*.34,r*.26,0,0,7); ctx.fill();
+  ctx.fillStyle='#2f6e18';
+  ctx.beginPath(); ctx.ellipse(-r*.13,r*.30,r*.07,r*.10,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse( r*.13,r*.30,r*.07,r*.10,0,0,7); ctx.fill();
+  if(dano>0.35){ ctx.strokeStyle='rgba(20,60,10,.6)'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(-r*.6,-r*.5); ctx.lineTo(-r*.2,-r*.1); ctx.lineTo(-r*.45,r*.25); ctx.stroke(); }
+  ctx.restore();
+}
+
+const PINTA = {
+  wood:  { cara:'#c08340', borde:'#8a5a24', linea:'#a06c30' },
+  beam:  { cara:'#c08340', borde:'#8a5a24', linea:'#a06c30' },
+  column:{ cara:'#c08340', borde:'#8a5a24', linea:'#a06c30' },
+  ice:   { cara:'rgba(160,225,255,.82)', borde:'#7fd0f5', linea:'rgba(255,255,255,.9)' },
+  stone: { cara:'#9b9ba6', borde:'#6f6f79', linea:'#8a8a95' },
+  tnt:   { cara:'#d63a2f', borde:'#7d1b13', linea:'#ffd93b' },
+};
+
+function bloque(t,x,y,ang,w,h,dano){
+  const p = PINTA[t]; ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+  const rr = Math.min(9, w/3, h/3);
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(-w/2,-h/2,w,h,rr); else ctx.rect(-w/2,-h/2,w,h);
+  ctx.fillStyle=p.cara; ctx.fill();
+  ctx.strokeStyle=p.borde; ctx.lineWidth=3.5; ctx.stroke();
+  ctx.save(); ctx.clip();
+  if(t==='wood'||t==='beam'||t==='column'){
+    ctx.strokeStyle=p.linea; ctx.lineWidth=2.2;
+    if(w>=h){ for(let i=1;i<3;i++){ const yy=-h/2+h*i/3; ctx.beginPath(); ctx.moveTo(-w/2,yy); ctx.lineTo(w/2,yy); ctx.stroke(); } }
+    else    { for(let i=1;i<3;i++){ const xx=-w/2+w*i/3; ctx.beginPath(); ctx.moveTo(xx,-h/2); ctx.lineTo(xx,h/2); ctx.stroke(); } }
+  } else if(t==='ice'){
+    ctx.strokeStyle=p.linea; ctx.lineWidth=5; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-w*.28,h*.3); ctx.lineTo(w*.18,-h*.32); ctx.stroke();
+    ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(w*.05,h*.34); ctx.lineTo(w*.34,-h*.06); ctx.stroke();
+  } else if(t==='stone'){
+    ctx.fillStyle=p.linea;
+    for(let i=0;i<6;i++){ const a=(i*2.4), rx=Math.cos(a)*w*.3, ry=Math.sin(a*1.7)*h*.3;
+      ctx.beginPath(); ctx.arc(rx,ry,Math.min(w,h)*.09,0,7); ctx.fill(); }
+  } else if(t==='tnt'){
+    ctx.fillStyle=p.linea; ctx.fillRect(-w/2,-h*.16,w,h*.32);
+    ctx.fillStyle='#7d1b13'; ctx.font='bold '+Math.round(h*.28)+'px Verdana';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('TNT',0,0);
+    ctx.strokeStyle='#3a2410'; ctx.lineWidth=4; ctx.beginPath();
+    ctx.moveTo(0,-h/2); ctx.quadraticCurveTo(w*.24,-h*.78,w*.06,-h*.92); ctx.stroke();
+  }
+  // grietas
+  if(dano>0.28){
+    ctx.strokeStyle='rgba(40,20,0,.55)'; ctx.lineWidth=2.6;
+    const n = dano>0.66?3:(dano>0.45?2:1);
+    for(let i=0;i<n;i++){ const ox=(i-1)*w*.26;
+      ctx.beginPath(); ctx.moveTo(ox-w*.1,-h/2); ctx.lineTo(ox+w*.06,-h*.1);
+      ctx.lineTo(ox-w*.05,h*.12); ctx.lineTo(ox+w*.08,h/2); ctx.stroke(); }
+  }
+  ctx.restore(); ctx.restore();
+}
+
+function dibujaPieza(t,x,y,ang,dano){
+  const d = TIPOS[t];
+  if(t==='pig') cerdito(x,y,ang,d.r,dano||0);
+  else bloque(t,x,y,ang,d.w,d.h,dano||0);
+}
+
+/* ---------- partículas ---------- */
+function chispas(x,y,color,n,fuerza){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*7, v=(0.4+Math.random())*(fuerza||7);
+    S.particulas.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2,
+      vida:1,r:3+Math.random()*8,color,rot:Math.random()*7,vr:(Math.random()-.5)*.4});
+  }
+}
+function pintaParticulas(){
+  for(const p of S.particulas){
+    ctx.save(); ctx.globalAlpha=Math.max(0,p.vida); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+    ctx.fillStyle=p.color; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx.restore();
+  }
+}
+function mueveParticulas(){
+  for(let i=S.particulas.length-1;i>=0;i--){
+    const p=S.particulas[i];
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.42; p.vx*=0.99; p.rot+=p.vr; p.vida-=0.016;
+    if(p.vida<=0 || p.y>H+80) S.particulas.splice(i,1);
+  }
+}
+
+/* ============================================================
+   MODO CONSTRUIR
+   ============================================================ */
+function caja(t,x,y){
+  const d=TIPOS[t];
+  const w = d.forma==='circ' ? d.r*2 : d.w, h = d.forma==='circ' ? d.r*2 : d.h;
+  return { x1:x-w/2, y1:y-h/2, x2:x+w/2, y2:y+h/2 };
+}
+function chocan(a,b){ const e=3; return a.x1<b.x2-e && a.x2>b.x1+e && a.y1<b.y2-e && a.y2>b.y1+e; }
+
+function sePuede(t,x,y,ignorar){
+  const c = caja(t,x,y);
+  if(c.x1 < ZONA_X || c.x2 > W-20 || c.y1 < 40 || c.y2 > SUELO+0.5) return false;
+  for(let i=0;i<S.piezas.length;i++){
+    if(i===ignorar) continue;
+    const p=S.piezas[i];
+    if(chocan(c, caja(p.t,p.x,p.y))) return false;
+  }
+  return true;
+}
+function iman(v){ return Math.round(v/REJILLA)*REJILLA; }
+
+function piezaEn(x,y){
+  for(let i=S.piezas.length-1;i>=0;i--){
+    const p=S.piezas[i], c=caja(p.t,p.x,p.y);
+    if(x>=c.x1&&x<=c.x2&&y>=c.y1&&y<=c.y2) return i;
+  }
+  return -1;
+}
+
+function guardaHistorial(){
+  S.historial.push(JSON.stringify(S.piezas));
+  if(S.historial.length>40) S.historial.shift();
+}
+function deshacer(){
+  if(!S.historial.length){ aviso('Nada que deshacer'); return; }
+  S.piezas = JSON.parse(S.historial.pop()); guardaNivel(); SFX.borrar(); refrescaMarcador();
+}
+function guardaNivel(){ try{ localStorage.setItem('pajaros-locos-nivel', JSON.stringify(S.piezas)); }catch(e){} }
+function cargaNivel(){
+  try{ const s=localStorage.getItem('pajaros-locos-nivel'); if(s){ const p=JSON.parse(s); if(Array.isArray(p)) return p; } }catch(e){}
+  return JSON.parse(JSON.stringify(EJEMPLOS[0]));
+}
+
+let avisoT=null;
+function aviso(txt){
+  const e=document.getElementById('aviso'); e.textContent=txt; e.classList.add('on');
+  clearTimeout(avisoT); avisoT=setTimeout(()=>e.classList.remove('on'),1600);
+}
+
+function pintaConstruir(){
+  fondo();
+  // rejilla suave en la zona de construcción
+  ctx.save(); ctx.strokeStyle='rgba(255,255,255,.30)'; ctx.lineWidth=1;
+  for(let x=ZONA_X;x<W-10;x+=REJILLA*2){ ctx.beginPath(); ctx.moveTo(x,60); ctx.lineTo(x,SUELO); ctx.stroke(); }
+  for(let y=60;y<SUELO;y+=REJILLA*2){ ctx.beginPath(); ctx.moveTo(ZONA_X,y); ctx.lineTo(W-10,y); ctx.stroke(); }
+  ctx.restore();
+  // línea de la zona prohibida
+  ctx.save(); ctx.setLineDash([16,14]); ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(ZONA_X,60); ctx.lineTo(ZONA_X,SUELO); ctx.stroke(); ctx.restore();
+
+  suelo(); tirachinas(false);
+  pajaro(HORQ.x, HORQ.y-4, 0, 26);
+
+  S.piezas.forEach((p,i)=>{ if(S.arrastrando && S.arrastrando.i===i) return; dibujaPieza(p.t,p.x,p.y,0,0); });
+
+  // pieza que se está moviendo
+  if(S.arrastrando){
+    const a=S.arrastrando, ok=sePuede(a.t,a.x,a.y,a.i);
+    ctx.save(); ctx.globalAlpha=.85; dibujaPieza(a.t,a.x,a.y,0,0);
+    ctx.strokeStyle = ok?'#3ee03e':'#ff3b3b'; ctx.lineWidth=6; ctx.setLineDash([12,8]);
+    const c=caja(a.t,a.x,a.y); ctx.strokeRect(c.x1-5,c.y1-5,c.x2-c.x1+10,c.y2-c.y1+10); ctx.restore();
+  }
+  // fantasma bajo el ratón
+  else if(S.raton && S.herramienta!=='borrar'){
+    const x=iman(S.raton.x), y=iman(S.raton.y), ok=sePuede(S.herramienta,x,y,-1);
+    ctx.save(); ctx.globalAlpha= ok?.55:.30; dibujaPieza(S.herramienta,x,y,0,0);
+    if(!ok){ ctx.globalAlpha=.9; ctx.strokeStyle='#ff3b3b'; ctx.lineWidth=6;
+      const c=caja(S.herramienta,x,y); ctx.beginPath();
+      ctx.moveTo(c.x1,c.y1); ctx.lineTo(c.x2,c.y2); ctx.moveTo(c.x2,c.y1); ctx.lineTo(c.x1,c.y2); ctx.stroke(); }
+    ctx.restore();
+  }
+
+  // cartel si está vacío
+  if(!S.piezas.length){
+    ctx.save(); ctx.textAlign='center'; ctx.font='bold 46px Verdana';
+    ctx.fillStyle='rgba(255,255,255,.95)'; ctx.strokeStyle='rgba(60,40,0,.5)'; ctx.lineWidth=8;
+    ctx.strokeText('👇 Elige una pieza y toca aquí 👇',1010,420);
+    ctx.fillText('👇 Elige una pieza y toca aquí 👇',1010,420); ctx.restore();
+  }
+  pintaParticulas();
+}
+
+/* ============================================================
+   MODO JUGAR — física
+   ============================================================ */
+function creaMundo(){
+  S.motor = Engine.create();
+  S.motor.gravity.y = 1.7;
+  S.cuerpos = []; S.particulas = []; S.pajaro=null;
+  S.pajarosUsados = 0; S.finPuesto=false; S.quietoDesde=0; S.calma=0;
+
+  const est = { isStatic:true, friction:.9, restitution:.05 };
+  Composite.add(S.motor.world, [
+    Bodies.rectangle(W/2, SUELO+300, W*3, 600, est),
+    Bodies.rectangle(-60, H/2, 120, H*3, est),
+    Bodies.rectangle(W+60, H/2, 120, H*3, est),
+  ]);
+
+  S.piezas.forEach(p=>{
+    const d=TIPOS[p.t];
+    const op = { density:d.dens, friction:.62, frictionStatic:.9, restitution:.06,
+                 frictionAir:.008, slop:.02 };
+    const b = d.forma==='circ' ? Bodies.circle(p.x,p.y,d.r,op) : Bodies.rectangle(p.x,p.y,d.w,d.h,op);
+    b.datos = { t:p.t, hp:d.hp, max:d.hp, muerto:false };
+    Composite.add(S.motor.world,b); S.cuerpos.push(b);
+  });
+
+  Events.on(S.motor,'collisionStart', ev=>{
+    for(const par of ev.pairs){
+      const a=par.bodyA, b=par.bodyB;
+      const rv = Math.hypot(a.velocity.x-b.velocity.x, a.velocity.y-b.velocity.y);
+      if(rv < 5) continue;
+      if(rv > 7) SFX.golpe();
+      daña(a,rv,b); daña(b,rv,a);
+    }
+  });
+  refrescaMarcador();
+}
+
+function daña(cuerpo, rv, otro){
+  const d = cuerpo.datos;
+  if(!d || d.muerto || d.t==='bird') return;
+  const masa = otro.isStatic ? 11 : Math.min(otro.mass, 26);
+  const dmg = (rv-5) * masa * 0.26;
+  if(dmg <= 0) return;
+  d.hp -= dmg;
+  if(d.hp <= 0) destruye(cuerpo);
+}
+
+function destruye(cuerpo){
+  const d = cuerpo.datos; if(!d || d.muerto) return; d.muerto = true;
+  const x=cuerpo.position.x, y=cuerpo.position.y;
+  if(d.t==='pig'){ SFX.cerdo(); chispas(x,y,'#5fbe36',22,8); chispas(x,y,'#a8e88a',10,6); }
+  else if(d.t==='tnt'){ explota(x,y); }
+  else if(d.t==='ice'){ SFX.rompe(); chispas(x,y,'#bfe9ff',20,7); }
+  else if(d.t==='stone'){ SFX.rompe(); chispas(x,y,'#9b9ba6',18,6); }
+  else { SFX.rompe(); chispas(x,y,'#c08340',18,6); }
+  Composite.remove(S.motor.world, cuerpo);
+  const i=S.cuerpos.indexOf(cuerpo); if(i>=0) S.cuerpos.splice(i,1);
+}
+
+function explota(x,y){
+  SFX.boom(); S.sacudida = 22;
+  chispas(x,y,'#ffd93b',34,14); chispas(x,y,'#ff7b2e',26,11); chispas(x,y,'#6b6b6b',14,8);
+  const R = 270;
+  // copia: destruye() modifica la lista
+  for(const b of S.cuerpos.slice()){
+    if(b.datos && b.datos.muerto) continue;
+    const dx=b.position.x-x, dy=b.position.y-y, dist=Math.hypot(dx,dy)||1;
+    if(dist > R) continue;
+    const f = (1-dist/R);
+    Body.setVelocity(b,{ x:b.velocity.x + (dx/dist)*f*26, y:b.velocity.y + (dy/dist)*f*26 - f*7 });
+    if(b.datos && b.datos.t!=='bird'){ b.datos.hp -= f*90; if(b.datos.hp<=0) destruye(b); }
+  }
+  if(S.pajaro){
+    const dx=S.pajaro.position.x-x, dy=S.pajaro.position.y-y, dist=Math.hypot(dx,dy)||1;
+    if(dist<R){ const f=1-dist/R;
+      Body.setVelocity(S.pajaro,{x:S.pajaro.velocity.x+(dx/dist)*f*24, y:S.pajaro.velocity.y+(dy/dist)*f*24-f*6}); }
+  }
+}
+
+function lanzaPajaro(vx,vy){
+  const b = Bodies.circle(S.aim.x, S.aim.y, 26,
+    { density:.005, friction:.5, frictionAir:.006, restitution:.42, slop:.02 });
+  b.datos = { t:'bird', muerto:false };
+  Body.setVelocity(b,{x:vx,y:vy});
+  Composite.add(S.motor.world,b);
+  S.pajaro = b; S.pajarosUsados++; S.quietoDesde = 0;
+  SFX.lanza(); chispas(S.aim.x,S.aim.y,'#ffffff',8,4);
+  refrescaMarcador();
+}
+
+function quitaPajaro(){
+  if(S.pajaro){ chispas(S.pajaro.position.x,S.pajaro.position.y,'#e0322a',10,5);
+    Composite.remove(S.motor.world,S.pajaro); S.pajaro=null; }
+}
+
+function cerditosVivos(){ return S.cuerpos.filter(b=>b.datos && b.datos.t==='pig' && !b.datos.muerto).length; }
+
+function revisaFin(){
+  if(S.finPuesto) return;
+  if(cerditosVivos()===0){ S.finPuesto=true; setTimeout(()=>finPartida(true),900); return; }
+  if(S.pajarosUsados>=PAJAROS_TOTAL && !S.pajaro){
+    const movido = S.cuerpos.some(b=>!b.isStatic && (Math.hypot(b.velocity.x,b.velocity.y)>0.7));
+    if(!movido){ S.calma++; if(S.calma>70){ S.finPuesto=true; finPartida(false); } }
+    else S.calma=0;
+  }
+}
+
+function finPartida(gano){
+  const restantes = Math.max(0, PAJAROS_TOTAL - S.pajarosUsados);
+  const est = gano ? Math.max(1, Math.min(3, 1 + Math.ceil(restantes/2))) : 0;
+  document.getElementById('finTitulo').textContent = gano ? '🏆 ¡BIEN HECHO!' : '¡Casi casi!';
+  document.getElementById('finEstrellas').textContent = gano ? '⭐'.repeat(est)+'☆'.repeat(3-est) : '🐷💨';
+  document.getElementById('finTexto').textContent = gano
+    ? '¡Has tirado todos los cerditos! 🎉'
+    : 'Se acabaron los pájaros. ¡Prueba otra vez!';
+  document.getElementById('capaFin').classList.add('on');
+  gano ? SFX.gana() : SFX.falla();
+  if(gano) for(let i=0;i<7;i++) setTimeout(()=>chispas(300+Math.random()*1000, 200+Math.random()*260,
+      ['#ffd93b','#ff5fa2','#5fd0ff','#8ff07c'][i%4], 18, 9), i*110);
+}
+
+function pintaJugar(){
+  ctx.save();
+  if(S.sacudida>0){ ctx.translate((Math.random()-.5)*S.sacudida, (Math.random()-.5)*S.sacudida); S.sacudida*=0.88;
+    if(S.sacudida<0.5) S.sacudida=0; }
+  fondo(); suelo(); tirachinas(true);
+
+  // pájaro en espera / estirando
+  if(!S.pajaro && S.pajarosUsados < PAJAROS_TOTAL && !S.finPuesto){
+    const p = S.aim || { x:HORQ.x, y:HORQ.y-4 };
+    if(S.tirando){
+      // línea de puntos que predice el vuelo
+      const dx=HORQ.x-p.x, dy=HORQ.y-p.y, dist=Math.min(Math.hypot(dx,dy),ESTIRA_MAX)||0.001;
+      const pot=dist/ESTIRA_MAX, vx=(dx/dist)*pot*VEL_MAX, vy=(dy/dist)*pot*VEL_MAX;
+      let sx=p.x, sy=p.y, svx=vx, svy=vy;
+      const g = 1.7*0.001*Math.pow(1000/60,2);
+      ctx.fillStyle='rgba(255,255,255,.85)';
+      for(let i=0;i<95;i++){
+        svy+=g; svx*=0.994; svy*=0.994; sx+=svx; sy+=svy;
+        if(sy>SUELO-8||sx>W) break;
+        if(i%5===0){ ctx.beginPath(); ctx.arc(sx,sy,Math.max(2.5,6-i*0.035),0,7); ctx.fill(); }
+      }
+      gomas(p.x,p.y);
+      pajaro(p.x,p.y, Math.atan2(HORQ.y-p.y,HORQ.x-p.x), 26);
+      // medidor de fuerza
+      ctx.save(); ctx.translate(SLING.x-108,SLING.y-250);
+      ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fillRect(0,0,26,150);
+      ctx.fillStyle= pot>.75?'#ff4d4d':(pot>.4?'#ffc63b':'#8ff07c');
+      ctx.fillRect(3,150-144*pot+3,20,144*pot-6);
+      ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.strokeRect(0,0,26,150); ctx.restore();
+    } else {
+      const flot = Math.sin(S.tiempo*0.06)*3;
+      pajaro(HORQ.x, HORQ.y-4+flot, 0, 26);
+      // manita que indica "tira de mí"
+      ctx.save(); ctx.font='40px serif'; ctx.textAlign='center';
+      ctx.globalAlpha=.75+Math.sin(S.tiempo*0.1)*.25;
+      ctx.fillText('👈', HORQ.x+78+Math.sin(S.tiempo*0.1)*10, HORQ.y+14); ctx.restore();
+    }
+  }
+
+  // cuerpos físicos
+  for(const b of S.cuerpos){
+    const d=b.datos, dano = 1 - Math.max(0,d.hp)/d.max;
+    dibujaPieza(d.t, b.position.x, b.position.y, b.angle, dano);
+  }
+  if(S.pajaro) pajaro(S.pajaro.position.x, S.pajaro.position.y, S.pajaro.angle, 26);
+
+  pintaParticulas();
+  ctx.restore();
+}
+
+/* ============================================================
+   BUCLE
+   ============================================================ */
+function bucle(){
+  S.tiempo++;
+  medirSiHaceFalta();
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillStyle='#5bb3e0'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(vista.esc,0,0,vista.esc,vista.ox,vista.oy);
+
+  if(S.modo==='jugar' && S.motor){
+    Engine.update(S.motor, 1000/60);
+    // limpia lo que se cae del mundo
+    for(const b of S.cuerpos.slice()) if(b.position.y > H+400) destruye(b);
+    if(S.pajaro){
+      const p=S.pajaro, v=Math.hypot(p.velocity.x,p.velocity.y);
+      if(p.position.y>H+300 || p.position.x>W+300 || p.position.x<-300) { quitaPajaro(); }
+      else if(v<0.55){ S.quietoDesde++; if(S.quietoDesde>80) quitaPajaro(); }
+      else S.quietoDesde=0;
+    }
+    revisaFin();
+    pintaJugar();
+  } else {
+    pintaConstruir();
+  }
+  mueveParticulas();
+  requestAnimationFrame(bucle);
+}
+let ultimoW=0, ultimoH=0;
+function medirSiHaceFalta(){
+  const r=cv.getBoundingClientRect();
+  if(Math.abs(r.width-ultimoW)>1 || Math.abs(r.height-ultimoH)>1){ ultimoW=r.width; ultimoH=r.height; medir(); }
+}
+
+/* ============================================================
+   ENTRADA (ratón + dedo)
+   ============================================================ */
+cv.addEventListener('pointerdown', e=>{
+  cv.setPointerCapture(e.pointerId);
+  const m = aMundo(e); if(ac() && ac().state==='suspended') ac().resume();
+
+  if(S.modo==='construir'){
+    const i = piezaEn(m.x,m.y);
+    if(S.herramienta==='borrar'){
+      if(i>=0){ guardaHistorial(); const p=S.piezas[i];
+        chispas(p.x,p.y,'#ffffff',12,6); S.piezas.splice(i,1); guardaNivel(); SFX.borrar(); }
+      else aviso('Toca una pieza para borrarla');
+      return;
+    }
+    if(i>=0){ guardaHistorial(); const p=S.piezas[i];
+      S.arrastrando={ i, t:p.t, x:p.x, y:p.y, ox:m.x-p.x, oy:m.y-p.y, orig:{x:p.x,y:p.y} }; SFX.clic(); return; }
+    const x=iman(m.x), y=iman(m.y);
+    if(sePuede(S.herramienta,x,y,-1)){
+      guardaHistorial(); S.piezas.push({t:S.herramienta,x,y});
+      chispas(x,y,'#fff7c4',7,4); guardaNivel(); SFX.poner(); refrescaMarcador();
+    } else {
+      SFX.borrar();
+      aviso(m.x<ZONA_X ? '¡Aquí no! Construye a la derecha 👉' : '¡Ahí no cabe! Prueba en otro sitio');
+    }
+    return;
+  }
+
+  // ---- jugar: estirar el tirachinas ----
+  if(S.pajaro || S.finPuesto || S.pajarosUsados>=PAJAROS_TOTAL) return;
+  const d = Math.hypot(m.x-HORQ.x, m.y-HORQ.y);
+  if(d < 190){ S.tirando=true; S.aim={x:m.x,y:m.y}; limitaAim(); SFX.estira(); }
+});
+
+cv.addEventListener('pointermove', e=>{
+  const m = aMundo(e); S.raton = m;
+  if(S.modo==='construir' && S.arrastrando){
+    S.arrastrando.x = iman(m.x - S.arrastrando.ox);
+    S.arrastrando.y = iman(m.y - S.arrastrando.oy);
+  } else if(S.modo==='jugar' && S.tirando){
+    S.aim={x:m.x,y:m.y}; limitaAim();
+  }
+});
+function limitaAim(){
+  const dx=S.aim.x-HORQ.x, dy=S.aim.y-HORQ.y, d=Math.hypot(dx,dy);
+  if(d>ESTIRA_MAX){ S.aim.x=HORQ.x+dx/d*ESTIRA_MAX; S.aim.y=HORQ.y+dy/d*ESTIRA_MAX; }
+  if(S.aim.y > SUELO-30) S.aim.y = SUELO-30;
+}
+
+function suelta(e){
+  if(S.modo==='construir' && S.arrastrando){
+    const a=S.arrastrando;
+    if(sePuede(a.t,a.x,a.y,a.i)){ S.piezas[a.i].x=a.x; S.piezas[a.i].y=a.y; guardaNivel(); SFX.poner(); }
+    else { S.historial.pop(); aviso('¡Ahí no cabe!'); SFX.borrar(); }
+    S.arrastrando=null; return;
+  }
+  if(S.modo==='jugar' && S.tirando){
+    S.tirando=false;
+    const dx=HORQ.x-S.aim.x, dy=HORQ.y-S.aim.y, d=Math.hypot(dx,dy);
+    if(d<26){ S.aim=null; return; }               // tirón muy flojo: no lanza
+    const pot=Math.min(d,ESTIRA_MAX)/ESTIRA_MAX;
+    lanzaPajaro((dx/d)*pot*VEL_MAX, (dy/d)*pot*VEL_MAX);
+    S.aim=null;
+  }
+}
+cv.addEventListener('pointerup', suelta);
+cv.addEventListener('pointercancel', suelta);
+cv.addEventListener('pointerleave', ()=>{ S.raton=null; });
+window.addEventListener('contextmenu', e=>e.preventDefault());
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+const barraC = document.getElementById('barraConstruir');
+ORDEN.forEach(t=>{
+  const b=document.createElement('button');
+  b.className='pieza'+(t===S.herramienta?' on':''); b.dataset.t=t;
+  b.innerHTML='<span class="em">'+TIPOS[t].emoji+'</span><span class="tx">'+TIPOS[t].nombre+'</span>';
+  b.onclick=()=>{ S.herramienta=t; marcaHerramienta(); SFX.clic(); };
+  barraC.appendChild(b);
+});
+{
+  const b=document.createElement('button');
+  b.className='pieza'; b.dataset.t='borrar';
+  b.innerHTML='<span class="em">🧽</span><span class="tx">BORRAR</span>';
+  b.onclick=()=>{ S.herramienta='borrar'; marcaHerramienta(); SFX.clic(); };
+  barraC.appendChild(b);
+
+  const s=document.createElement('div'); s.className='sep'; barraC.appendChild(s);
+
+  const extra=[
+    ['↩️','DESHACER', deshacer],
+    ['🎲','EJEMPLO', ()=>{ guardaHistorial(); S.piezas=JSON.parse(JSON.stringify(EJEMPLOS[ejemploN%EJEMPLOS.length]));
+        ejemploN++; guardaNivel(); SFX.poner(); aviso('¡Nivel de ejemplo '+((ejemploN-1)%EJEMPLOS.length+1)+'!'); }],
+    ['🗑️','VACIAR', ()=>{ if(!S.piezas.length){ aviso('Ya está vacío'); return; }
+        guardaHistorial(); S.piezas=[]; guardaNivel(); SFX.borrar(); }],
+  ];
+  extra.forEach(([em,tx,fn])=>{
+    const e=document.createElement('button'); e.className='pieza';
+    e.innerHTML='<span class="em">'+em+'</span><span class="tx">'+tx+'</span>';
+    e.onclick=fn; barraC.appendChild(e);
+  });
+}
+function marcaHerramienta(){
+  barraC.querySelectorAll('.pieza').forEach(b=>b.classList.toggle('on', b.dataset.t===S.herramienta));
+}
+
+const bC=document.getElementById('btnConstruir'), bJ=document.getElementById('btnJugar');
+bC.onclick=()=>cambiaModo('construir');
+bJ.onclick=()=>cambiaModo('jugar');
+
+function cambiaModo(m){
+  if(m===S.modo && m==='construir') return;
+  document.getElementById('capaFin').classList.remove('on');
+  if(m==='jugar'){
+    if(!S.piezas.some(p=>p.t==='pig')){ aviso('🐷 ¡Pon al menos un cerdito!'); SFX.borrar();
+      S.herramienta='pig'; marcaHerramienta(); return; }
+    S.modo='jugar'; creaMundo();
+    document.getElementById('barraConstruir').style.display='none';
+    document.getElementById('barraJugar').style.display='flex';
+  } else {
+    S.modo='construir'; S.motor=null; S.cuerpos=[]; S.pajaro=null; S.particulas=[]; S.aim=null; S.tirando=false;
+    document.getElementById('barraConstruir').style.display='flex';
+    document.getElementById('barraJugar').style.display='none';
+  }
+  bC.classList.toggle('on', S.modo==='construir');
+  bJ.classList.toggle('on', S.modo==='jugar');
+  SFX.clic();
+}
+
+function refrescaMarcador(){
+  const quedan = Math.max(0, PAJAROS_TOTAL - S.pajarosUsados);
+  document.getElementById('marBirds').textContent = '🐦'.repeat(quedan) || '—';
+  const cerdos = S.modo==='jugar' ? cerditosVivos() : S.piezas.filter(p=>p.t==='pig').length;
+  document.getElementById('marPigs').textContent = '🐷 '+cerdos;
+}
+setInterval(()=>{ if(S.modo==='jugar') refrescaMarcador(); }, 300);
+
+document.getElementById('btnOtra').onclick=()=>{ document.getElementById('capaFin').classList.remove('on'); creaMundo(); SFX.clic(); };
+document.getElementById('finOtra').onclick=()=>{ document.getElementById('capaFin').classList.remove('on'); creaMundo(); SFX.clic(); };
+document.getElementById('finConstruir').onclick=()=>{ cambiaModo('construir'); };
+document.getElementById('btnAyuda').onclick=()=>{ document.getElementById('capaAyuda').classList.add('on'); SFX.clic(); };
+document.getElementById('ayudaOk').onclick=()=>{ document.getElementById('capaAyuda').classList.remove('on'); SFX.clic();
+  try{ localStorage.setItem('pajaros-locos-visto','1'); }catch(e){} };
+document.getElementById('btnSonido').onclick=e=>{ S.mudo=!S.mudo;
+  e.currentTarget.textContent = S.mudo?'🔇':'🔊'; if(!S.mudo) SFX.clic(); };
+
+/* teclado, por si acaso */
+window.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ document.getElementById('capaAyuda').classList.remove('on');
+                        document.getElementById('capaFin').classList.remove('on'); }
+  if(S.modo==='construir' && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); deshacer(); }
+});
+
+/* ============================================================
+   TALLER: FOTO DE UN DIBUJO → PÁJARO
+   Recorta el papel, quita el fondo por inundación desde los
+   bordes (así los blancos de dentro del dibujo se conservan)
+   y le pone un contorno de pegatina.
+   ============================================================ */
+function extraeDibujo(src, umbral){
+  const MAX = 460;
+  let w = src.naturalWidth || src.width, h = src.naturalHeight || src.height;
+  if(!w || !h) return null;
+  const k0 = Math.min(1, MAX/Math.max(w,h));
+  w = Math.max(8, Math.round(w*k0)); h = Math.max(8, Math.round(h*k0));
+
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const g = c.getContext('2d', {willReadFrequently:true});
+  g.drawImage(src, 0, 0, w, h);
+  const dat = g.getImageData(0,0,w,h), p = dat.data;
+
+  // color del papel = media del marco de la foto
+  let br=0, bg=0, bb=0, n=0;
+  for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+    if(i>3 && j>3 && i<w-4 && j<h-4) continue;
+    const o=(j*w+i)*4; br+=p[o]; bg+=p[o+1]; bb+=p[o+2]; n++;
+  }
+  br/=n; bg/=n; bb/=n;
+  const u2 = umbral*umbral;
+  const esFondo = o => { const a=p[o]-br, b=p[o+1]-bg, d=p[o+2]-bb; return a*a+b*b+d*d < u2; };
+
+  // inundación desde los cuatro bordes
+  const visto = new Uint8Array(w*h), cola = new Int32Array(w*h);
+  let ini=0, fin=0;
+  const mete = id => { if(!visto[id] && esFondo(id*4)){ visto[id]=1; cola[fin++]=id; } };
+  for(let i=0;i<w;i++){ mete(i); mete((h-1)*w+i); }
+  for(let j=0;j<h;j++){ mete(j*w); mete(j*w+w-1); }
+  while(ini<fin){
+    const id=cola[ini++], i=id%w, j=(id/w)|0;
+    if(i>0)   mete(id-1);
+    if(i<w-1) mete(id+1);
+    if(j>0)   mete(id-w);
+    if(j<h-1) mete(id+w);
+  }
+
+  // transparencia + caja del dibujo
+  let x1=w, y1=h, x2=-1, y2=-1, vivos=0;
+  for(let j=0;j<h;j++) for(let i=0;i<w;i++){
+    const id=j*w+i;
+    if(visto[id]) p[id*4+3]=0;
+    else { vivos++; if(i<x1)x1=i; if(i>x2)x2=i; if(j<y1)y1=j; if(j>y2)y2=j; }
+  }
+  if(x2<0 || vivos < 40) return null;                 // no se ve nada
+  if(vivos > w*h*0.97) { x1=0; y1=0; x2=w-1; y2=h-1; } // no se quitó fondo: se usa entera
+  g.putImageData(dat,0,0);
+
+  const pad=2;
+  x1=Math.max(0,x1-pad); y1=Math.max(0,y1-pad);
+  x2=Math.min(w-1,x2+pad); y2=Math.min(h-1,y2+pad);
+  const cw=x2-x1+1, ch=y2-y1+1;
+
+  // escala a un tamaño cómodo y añade contorno de pegatina
+  const DEST = 190, G = 5;
+  const s = Math.min(DEST/cw, DEST/ch, 2.2);
+  const fw = Math.max(8,Math.round(cw*s)), fh = Math.max(8,Math.round(ch*s));
+  const c2 = document.createElement('canvas');
+  c2.width = fw + G*2; c2.height = fh + G*2;
+  const g2 = c2.getContext('2d');
+  for(let a=0;a<16;a++){
+    const an = a*Math.PI/8;
+    g2.drawImage(c, x1,y1,cw,ch, G+Math.cos(an)*G, G+Math.sin(an)*G, fw,fh);
+  }
+  g2.globalCompositeOperation='source-in';
+  g2.fillStyle='#3a2410'; g2.fillRect(0,0,c2.width,c2.height);
+  g2.globalCompositeOperation='source-over';
+  g2.drawImage(c, x1,y1,cw,ch, G,G,fw,fh);
+  return c2.toDataURL('image/png');
+}
+
+const elPaso1=document.getElementById('tallerPaso1'), elPaso2=document.getElementById('tallerPaso2');
+const lienzoPrev=document.getElementById('lienzoPrevio');
+
+function procesaFoto(){
+  if(!MI.fuente) return;
+  const url = extraeDibujo(MI.fuente, MI.umbral);
+  if(!url){
+    aviso('🤔 No veo el dibujo. Prueba con más luz');
+    MI.temp=null; elPaso2.classList.add('oculto'); elPaso1.classList.remove('oculto'); return;
+  }
+  MI.temp = url;
+  elPaso1.classList.add('oculto'); elPaso2.classList.remove('oculto');
+  const im = new Image();
+  im.onload = ()=>{
+    const g = lienzoPrev.getContext('2d'), L = lienzoPrev.width;
+    g.clearRect(0,0,L,L);
+    const k = Math.min(L*0.82/im.width, L*0.82/im.height);
+    g.drawImage(im, (L-im.width*k)/2, (L-im.height*k)/2, im.width*k, im.height*k);
+  };
+  im.src = url;
+}
+
+function leeArchivo(file){
+  if(!file) return;
+  const fr = new FileReader();
+  fr.onload = e=>{
+    const im = new Image();
+    im.onload = ()=>{ MI.fuente = im; MI.umbral = 62; procesaFoto(); };
+    im.onerror = ()=> aviso('No he podido abrir esa foto');
+    im.src = e.target.result;
+  };
+  fr.onerror = ()=> aviso('No he podido leer esa foto');
+  fr.readAsDataURL(file);
+}
+
+function guardaMisPajaros(){
+  try{
+    localStorage.setItem('pajaros-locos-dibujos', JSON.stringify(MI.lista));
+    localStorage.setItem('pajaros-locos-elegido', String(MI.sel));
+  }catch(e){ aviso('No caben más pájaros guardados'); }
+}
+function cargaMisPajaros(){
+  try{
+    const l = JSON.parse(localStorage.getItem('pajaros-locos-dibujos')||'[]');
+    if(Array.isArray(l)) MI.lista = l.filter(s=>typeof s==='string');
+    const s = parseInt(localStorage.getItem('pajaros-locos-elegido'),10);
+    MI.sel = (!isNaN(s) && s>=0 && s<MI.lista.length) ? s : -1;
+  }catch(e){}
+  aplicaPajaro();
+}
+function aplicaPajaro(){
+  if(MI.sel<0 || !MI.lista[MI.sel]){ MI.img=null; return; }
+  const im = new Image(); im.onload = ()=>{ MI.img = im; }; im.src = MI.lista[MI.sel];
+}
+
+function pintaGaleria(){
+  const gal = document.getElementById('galeria');
+  gal.innerHTML='';
+  // pájaro clásico
+  const clasico = document.createElement('button');
+  clasico.className = 'tarjeta' + (MI.sel<0?' on':'');
+  clasico.innerHTML = '<span style="font-size:38px">🐦</span>';
+  clasico.onclick = ()=>{ MI.sel=-1; MI.img=null; guardaMisPajaros(); pintaGaleria(); SFX.clic(); };
+  gal.appendChild(clasico);
+
+  MI.lista.forEach((url,i)=>{
+    const t = document.createElement('button');
+    t.className = 'tarjeta' + (MI.sel===i?' on':'');
+    const im = document.createElement('img'); im.src=url; im.alt='mi pájaro '+(i+1);
+    t.appendChild(im);
+    t.onclick = ()=>{ MI.sel=i; aplicaPajaro(); guardaMisPajaros(); pintaGaleria(); SFX.poner(); };
+    const x = document.createElement('button');
+    x.className='x'; x.textContent='✕'; x.title='Borrar';
+    x.onclick = ev=>{
+      ev.stopPropagation();
+      MI.lista.splice(i,1);
+      if(MI.sel===i){ MI.sel=-1; MI.img=null; } else if(MI.sel>i){ MI.sel--; }
+      guardaMisPajaros(); pintaGaleria(); SFX.borrar();
+    };
+    t.appendChild(x);
+    gal.appendChild(t);
+  });
+}
+
+document.getElementById('btnTaller').onclick = ()=>{
+  elPaso1.classList.remove('oculto'); elPaso2.classList.add('oculto');
+  MI.fuente=null; MI.temp=null;
+  pintaGaleria();
+  document.getElementById('capaTaller').classList.add('on'); SFX.clic();
+};
+document.getElementById('tallerCerrar').onclick = ()=>{
+  document.getElementById('capaTaller').classList.remove('on'); SFX.clic();
+};
+document.getElementById('btnCamara').onclick  = ()=>document.getElementById('inpCamara').click();
+document.getElementById('btnGaleria').onclick = ()=>document.getElementById('inpGaleria').click();
+document.getElementById('inpCamara').onchange  = e=>{ leeArchivo(e.target.files[0]); e.target.value=''; };
+document.getElementById('inpGaleria').onchange = e=>{ leeArchivo(e.target.files[0]); e.target.value=''; };
+document.getElementById('btnMasFondo').onclick   = ()=>{ MI.umbral=Math.min(170,MI.umbral+22); procesaFoto(); SFX.clic(); };
+document.getElementById('btnMenosFondo').onclick = ()=>{ MI.umbral=Math.max(18,MI.umbral-22); procesaFoto(); SFX.clic(); };
+document.getElementById('btnOtraFoto').onclick   = ()=>{
+  elPaso2.classList.add('oculto'); elPaso1.classList.remove('oculto'); SFX.clic();
+};
+document.getElementById('btnGuardarPajaro').onclick = ()=>{
+  if(!MI.temp) return;
+  MI.lista.push(MI.temp);
+  if(MI.lista.length>8) MI.lista.shift();
+  MI.sel = MI.lista.length-1;
+  MI.temp=null; MI.fuente=null;
+  aplicaPajaro(); guardaMisPajaros(); pintaGaleria();
+  elPaso2.classList.add('oculto'); elPaso1.classList.remove('oculto');
+  SFX.gana(); aviso('🐦 ¡Tu pájaro ya vuela!');
+};
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+/* el enlace al APK solo tiene sentido en la web, no dentro de la propia app */
+try{ if(location.hostname.indexOf('github.io')>=0) document.getElementById('lineaApk').classList.remove('oculto'); }catch(e){}
+
+S.piezas = cargaNivel();
+medir(); marcaHerramienta(); refrescaMarcador(); cargaMisPajaros();
+try{ if(!localStorage.getItem('pajaros-locos-visto')) document.getElementById('capaAyuda').classList.add('on'); }
+catch(e){ document.getElementById('capaAyuda').classList.add('on'); }
+requestAnimationFrame(bucle);
+</script>
+</body>
+</html>

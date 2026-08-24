@@ -1,0 +1,18 @@
+{
+  "name": "Pájaros Locos",
+  "short_name": "Pájaros",
+  "description": "Construye tu nivel, dibuja tu pájaro y derriba a los cerditos.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#5bb3e0",
+  "theme_color": "#ffd85e",
+  "icons": [
+    {
+      "src": "icono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

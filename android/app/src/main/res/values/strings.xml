@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pájaros Locos</string>
+    <string name="elige_foto">Haz una foto a tu dibujo</string>
+    <string name="salir">Pulsa otra vez para salir</string>
+</resources>
