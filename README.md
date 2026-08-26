@@ -88,7 +88,21 @@ echo '{"desc":"pájaro astronauta","poder":"turbo"}' | node herramientas/crear-p
 
 Hace falta tener el CLI `codex` instalado y con la sesión iniciada.
 
-### 2. Recortar personajes de una imagen con Gemini
+### 2. Meter personajes de una foto (los invitados)
+
+Los invitados salen de las imágenes de `imagenes/` **tal cual son**, solo quitándoles el
+fondo con `rembg` (nada de redibujarlos: conservan sus colores, su decoración y su pose).
+
+```bash
+python herramientas/invitados.py            # todos
+python herramientas/invitados.py tomas      # solo uno
+```
+
+De una lámina con varios personajes se saca cada uno con su caja (`caja=(x1,y1,x2,y2)`
+en tanto por uno, en `INVITADOS`). El script deja el PNG en `pajaros/` y lo apunta en el
+manifiesto con su poder, su tamaño y si hay que voltearlo para que mire a la derecha.
+
+### 3. Recortar personajes de una imagen con Gemini (versión simplificada)
 
 Para convertir una imagen de `imagenes/` en un pájaro jugable se usa el mismo truco que
 en *libros jorge*: el relay CDP contra el Chrome del usuario (su perfil, su sesión) y una

@@ -83,9 +83,18 @@ const servidor = http.createServer(async (req, res) => {
   });
 });
 
-servidor.listen(PUERTO, "127.0.0.1", () => {
-  console.log(`🐦 Pájaros Locos en marcha:`);
-  console.log(`   Juego:            http://127.0.0.1:${PUERTO}/index.html`);
-  console.log(`   Fábrica de aves:  http://127.0.0.1:${PUERTO}/crear.html`);
+servidor.listen(PUERTO, "0.0.0.0", async () => {
+  const { networkInterfaces } = await import("node:os");
+  const ips = ["127.0.0.1"];
+  for (const lista of Object.values(networkInterfaces())) {
+    for (const n of lista || []) {
+      if (n.family === "IPv4" && !n.internal) ips.push(n.address);
+    }
+  }
+  console.log(`🐦 Pájaros Locos en marcha. Ábrelo en:`);
+  for (const ip of ips) {
+    console.log(`   Juego:   http://${ip}:${PUERTO}/index.html`);
+    console.log(`   Fábrica: http://${ip}:${PUERTO}/crear.html`);
+  }
   console.log(`   (Ctrl+C para parar)`);
 });

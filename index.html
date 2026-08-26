@@ -632,12 +632,18 @@ function musicaEnciende(){
 const cv = document.getElementById('c');
 let ctx = cv.getContext('2d');
 const vista = { esc:1, ox:0, oy:0 };
+const MUNDO_MIN = 620;                 // mundo que hay que ver de alto como mínimo
 function medir(){
   const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
   cv.width = Math.max(1,Math.round(r.width*dpr));
   cv.height= Math.max(1,Math.round(r.height*dpr));
-  const e = Math.min(cv.width/W, cv.height/H);
-  vista.esc = e; vista.ox = (cv.width-W*e)/2; vista.oy = (cv.height-H*e)/2;
+  // El juego llena TODA la pantalla: se ajusta al ancho y, si el alto no da,
+  // se recorta cielo por arriba (nunca el suelo, ni el tirachinas, ni las torres).
+  let e = cv.width / W;
+  if(cv.height/e < MUNDO_MIN) e = cv.height / MUNDO_MIN;
+  vista.esc = e;
+  vista.ox = (cv.width - W*e)/2;
+  vista.oy = cv.height - H*e;          // el suelo, siempre pegado abajo
 }
 window.addEventListener('resize', medir);
 function aMundo(ev){
@@ -741,9 +747,13 @@ function todosLosIds(){ return ORDEN_AVES.concat(Object.keys(EXTRA)); }
 const nubes = [{x:250,y:130,s:1.2},{x:820,y:90,s:.9},{x:1320,y:170,s:1.1},{x:1080,y:250,s:.7}];
 
 function fondo(){
-  const g = ctx.createLinearGradient(0,0,0,SUELO);
+  // el cielo se estira hasta donde haga falta para tapar toda la pantalla
+  const arriba = Math.min(0, -vista.oy/vista.esc) - 20;
+  const izq = Math.min(0, -vista.ox/vista.esc) - 20;
+  const ancho = W - izq*2;
+  const g = ctx.createLinearGradient(0,arriba,0,SUELO);
   g.addColorStop(0,'#5fb8ea'); g.addColorStop(.6,'#a8ddf5'); g.addColorStop(1,'#dff3fb');
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,SUELO+4);
+  ctx.fillStyle=g; ctx.fillRect(izq,arriba,ancho,SUELO+4-arriba);
   ctx.save(); ctx.translate(1430,110);
   ctx.fillStyle='rgba(255,240,150,.35)'; ctx.beginPath(); ctx.arc(0,0,96,0,7); ctx.fill();
   ctx.fillStyle='#ffdf4d'; ctx.beginPath(); ctx.arc(0,0,58,0,7); ctx.fill();
@@ -766,13 +776,14 @@ function fondo(){
 }
 
 function suelo(){
-  ctx.fillStyle='#a06b32'; ctx.fillRect(0,SUELO,W,H-SUELO);
+  const izq = Math.min(0, -vista.ox/vista.esc) - 20, ancho = W - izq*2;
+  ctx.fillStyle='#a06b32'; ctx.fillRect(izq,SUELO,ancho,H-SUELO+400);
   ctx.fillStyle='#8a5a2b';
   for(let i=0;i<70;i++){ const x=(i*97)%W, y=SUELO+26+((i*53)%70);
     ctx.beginPath(); ctx.ellipse(x,y,13,7,0,0,7); ctx.fill(); }
-  ctx.fillStyle='#5fbe36'; ctx.fillRect(0,SUELO,W,20);
+  ctx.fillStyle='#5fbe36'; ctx.fillRect(izq,SUELO,ancho,20);
   ctx.fillStyle='#79d94c';
-  for(let x=0;x<W;x+=22){ ctx.beginPath(); ctx.moveTo(x,SUELO);
+  for(let x=izq;x<izq+ancho;x+=22){ ctx.beginPath(); ctx.moveTo(x,SUELO);
     ctx.quadraticCurveTo(x+6,SUELO-15,x+13,SUELO); ctx.fill(); }
 }
 
@@ -1720,7 +1731,9 @@ function juegaNivel(n){
   const niv = NIVELES[n-1]; if(!niv) return;
   S.nivel = n;
   S.piezas = JSON.parse(JSON.stringify(niv.piezas));
-  S.equipo = niv.equipo.filter(id=>AVES[id]||EXTRA[id]).slice(0,MAX_EQUIPO);
+  if(!S.equipoElegido || !S.equipo.length){
+    S.equipo = niv.equipo.filter(id=>AVES[id]||EXTRA[id]).slice(0,MAX_EQUIPO);
+  }
   if(!S.equipo.length) S.equipo=['rojo','rojo','rojo'];
   S.historial=[];
   S.modo='construir';                       // fuerza el rearranque limpio
@@ -1752,12 +1765,17 @@ function pintaAveEn(c,id){
     a.img.addEventListener('load', ()=>{ try{ pintaAveEn(c,id); }catch(e){} }, {once:true});
   }
 }
-function guardaEquipo(){
-  try{ localStorage.setItem('pajaros-locos-equipo', JSON.stringify(S.equipo)); }catch(e){}
+function guardaEquipo(elegido){
+  if(elegido) S.equipoElegido = true;
+  try{
+    localStorage.setItem('pajaros-locos-equipo', JSON.stringify(S.equipo));
+    localStorage.setItem('pajaros-locos-equipo-elegido', S.equipoElegido?'1':'');
+  }catch(e){}
 }
 function cargaEquipo(){
   try{ const j=JSON.parse(localStorage.getItem('pajaros-locos-equipo')||'null');
-       if(Array.isArray(j) && j.length) S.equipo=j.slice(0,MAX_EQUIPO); }catch(e){}
+       if(Array.isArray(j) && j.length) S.equipo=j.slice(0,MAX_EQUIPO);
+       S.equipoElegido = localStorage.getItem('pajaros-locos-equipo-elegido')==='1'; }catch(e){}
 }
 function pintaEquipo(){
   const e=document.getElementById('equipo'); e.innerHTML='';
@@ -1768,7 +1786,7 @@ function pintaEquipo(){
     if(id){
       b.appendChild(miniAve(id,60));
       b.title = getAve(id).nombre;
-      b.onclick=()=>{ S.equipo.splice(i,1); guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar(); };
+      b.onclick=()=>{ S.equipo.splice(i,1); guardaEquipo(true); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar(); };
     } else {
       b.textContent='+';
       b.onclick=()=>aviso('Toca un pájaro de abajo 👇');
@@ -1778,7 +1796,7 @@ function pintaEquipo(){
 }
 function añadeAve(id){
   if(S.equipo.length>=MAX_EQUIPO){ aviso('¡El tirachinas está lleno!'); SFX.borrar(); return; }
-  S.equipo.push(id); guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+  S.equipo.push(id); guardaEquipo(true); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
 }
 function pintaListaAves(){
   const L=document.getElementById('listaAves'); if(!L) return;
@@ -1817,16 +1835,16 @@ document.getElementById('avesAzar').onclick=()=>{
   const ids=todosLosIds(); S.equipo=[];
   const n=Math.min(5,ids.length);
   for(let i=0;i<n;i++) S.equipo.push(ids[Math.floor(Math.random()*ids.length)]);
-  guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+  guardaEquipo(true); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
 };
 document.getElementById('avesVariado').onclick=()=>{
   const ids=todosLosIds(); S.equipo=[];
   const salto=Math.max(1,Math.floor(ids.length/MAX_EQUIPO));
   for(let i=0;i<ids.length && S.equipo.length<MAX_EQUIPO;i+=salto) S.equipo.push(ids[i]);
-  guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+  guardaEquipo(true); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
 };
 document.getElementById('avesVacia').onclick=()=>{
-  S.equipo=[]; guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar();
+  S.equipo=[]; S.equipoElegido=false; guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar();
 };
 
 /* ---------- invitados: los pájaros recortados que hay en pajaros/ ---------- */
@@ -2049,7 +2067,7 @@ document.getElementById('btnGuardarPajaro').onclick = ()=>{
   MI.temp=null; MI.fuente=null;
   guardaMisPajaros(); regDibujos();
   const id='dib'+(MI.lista.length-1);
-  if(S.equipo.length<MAX_EQUIPO && S.equipo.indexOf(id)<0){ S.equipo.push(id); guardaEquipo(); }
+  if(S.equipo.length<MAX_EQUIPO && S.equipo.indexOf(id)<0){ S.equipo.push(id); guardaEquipo(true); }
   pintaGaleria(); pintaEquipo(); refrescaMarcador(true);
   elPaso2.classList.add('oculto'); elPaso1.classList.remove('oculto');
   SFX.gana(); aviso('🐦 ¡Tu pájaro ya vuela!');

@@ -7,13 +7,13 @@
       "serie": "Invitados",
       "archivo": "tomas.png",
       "poder": "tren",
-      "r": 30,
+      "r": 31,
       "dens": 0.0062,
       "pot": 1.4,
       "cerdo": false,
       "voltea": true,
-      "ancho": 419,
-      "alto": 420
+      "ancho": 406,
+      "alto": 460
     },
     {
       "id": "rayoveloz",
@@ -21,13 +21,13 @@
       "serie": "Invitados",
       "archivo": "rayoveloz.png",
       "poder": "turbo",
-      "r": 29,
+      "r": 30,
       "dens": 0.0058,
       "pot": 1.35,
       "cerdo": false,
       "voltea": true,
-      "ancho": 420,
-      "alto": 409
+      "ancho": 460,
+      "alto": 444
     },
     {
       "id": "lemi",
@@ -39,8 +39,9 @@
       "dens": 0.006,
       "pot": 1.2,
       "cerdo": false,
-      "ancho": 418,
-      "alto": 420
+      "voltea": false,
+      "ancho": 385,
+      "alto": 459
     },
     {
       "id": "grizzy",
@@ -52,21 +53,23 @@
       "dens": 0.0072,
       "pot": 1.6,
       "cerdo": false,
-      "ancho": 420,
-      "alto": 413
+      "voltea": true,
+      "ancho": 359,
+      "alto": 422
     },
     {
       "id": "camion",
-      "nombre": "Camión Rojo",
+      "nombre": "Race Ace",
       "serie": "Invitados",
       "archivo": "camion.png",
       "poder": "ruedas",
-      "r": 36,
+      "r": 38,
       "dens": 0.0085,
-      "pot": 2,
+      "pot": 2.0,
       "cerdo": false,
-      "ancho": 420,
-      "alto": 385
+      "voltea": true,
+      "ancho": 460,
+      "alto": 338
     },
     {
       "id": "cerdicoche",
@@ -74,12 +77,13 @@
       "serie": "Invitados",
       "archivo": "cerdicoche.png",
       "poder": "ruedas",
-      "r": 36,
+      "r": 40,
       "dens": 0.008,
       "pot": 1.8,
       "cerdo": true,
-      "ancho": 420,
-      "alto": 327
+      "voltea": false,
+      "ancho": 460,
+      "alto": 359
     },
     {
       "id": "capitan-pico",

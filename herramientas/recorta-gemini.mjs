@@ -111,6 +111,24 @@ const PERSONAJES = [
 function prompt(p) {
   // TODO en una sola linea: el compositor de Gemini se come los saltos de linea
   // y el relay aborta al comprobar que el texto pegado coincide con el enviado.
+  if (p.fiel) {
+    // Modo FIEL: recortar sin redibujar. Es lo que hay que usar cuando el
+    // personaje tiene que seguir siendo reconocible (decoracion, llamas,
+    // aleron, ruedas, numeros...). Si se le pide "simplificar" pierde
+    // la identidad y sale un pajaro generico.
+    return [
+      "Mira la imagen adjunta y devuelveme UNA IMAGEN nueva.",
+      `Quiero EXACTAMENTE ${p.quien}, recortado del fondo.`,
+      "MUY IMPORTANTE: NO lo redibujes, NO lo simplifiques y NO cambies su estilo.",
+      "Copia el personaje tal cual, con la MISMA pose, los MISMOS colores y TODOS sus detalles y su decoracion",
+      `(${p.detalles || "todo lo que lleve encima"}), que se siga reconociendo al primer vistazo.`,
+      "Lo unico que cambia es el fondo: FONDO BLANCO PURO (#FFFFFF) liso de borde a borde,",
+      "sin cielo, sin hierba, sin carretera, sin degradados, sin viñeta y sin sombra en el suelo.",
+      "El personaje entero y centrado, ocupando casi toda la imagen, sin cortarse ni recortarse por los bordes.",
+      "Un solo personaje, sin copias, sin amigos y sin objetos sueltos alrededor.",
+      "Sin marcas de agua ni texto añadido. Imagen cuadrada. Devuelve solo la imagen.",
+    ].join(" ");
+  }
   return [
     "Mira la imagen adjunta y devuelveme UNA IMAGEN nueva.",
     `Quiero SOLO ${p.quien}, recortado y simplificado.`,
