@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="description" content="Construye tu propio nivel de pájaros y cerditos, y luego juégalo. Para peques de 6 años.">
+<meta name="description" content="Construye tu propio nivel de pájaros y cerditos, juega 30 niveles y elige entre todos los pájaros. Para peques de 6 años.">
 <meta name="theme-color" content="#7ec8f0">
 <link rel="manifest" href="manifest.json">
-<title>Pájaros Locos — Construye tu nivel</title>
+<title>Pájaros Locos — 30 niveles y todos los pájaros</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -20,136 +20,179 @@
 
   /* ---------- barra de arriba ---------- */
   header{
-    flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:6px 10px;
+    flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:5px 8px;
     background:linear-gradient(#ffd85e,#ffb524);
     border-bottom:5px solid #c9800f;box-shadow:0 3px 10px rgba(0,0,0,.25);z-index:5;
   }
-  .logo{font-size:clamp(15px,2.4vw,26px);font-weight:900;color:#7a3d00;
+  .logo{font-size:clamp(13px,2vw,24px);font-weight:900;color:#7a3d00;
         text-shadow:2px 2px 0 #fff5cc;white-space:nowrap;letter-spacing:.5px}
-  .logo small{display:block;font-size:.55em;font-weight:700;opacity:.8}
   .spacer{flex:1}
 
   button{font-family:inherit;cursor:pointer;border:none;background:none}
 
-  .modos{display:flex;gap:8px}
+  .modos{display:flex;gap:6px}
   .modo{
-    font-size:clamp(14px,2vw,22px);font-weight:900;color:#5a3a12;
+    font-size:clamp(12px,1.8vw,20px);font-weight:900;color:#5a3a12;
     background:#fff3d0;border:4px solid #b8791d;border-radius:16px;
-    padding:8px 16px;box-shadow:0 4px 0 #b8791d;transition:transform .08s;
+    padding:7px 13px;box-shadow:0 4px 0 #b8791d;transition:transform .08s;
     white-space:nowrap;
   }
   .modo:active{transform:translateY(3px);box-shadow:0 1px 0 #b8791d}
   .modo.on{background:#6fd45c;color:#0d3d06;border-color:#2e7a20;box-shadow:0 4px 0 #2e7a20}
 
   .mini{
-    font-size:clamp(18px,2.4vw,26px);background:#fff3d0;border:4px solid #b8791d;
-    border-radius:14px;width:clamp(44px,6vw,58px);height:clamp(44px,6vw,58px);
+    font-size:clamp(17px,2.2vw,24px);background:#fff3d0;border:4px solid #b8791d;
+    border-radius:14px;width:clamp(40px,5.4vw,54px);height:clamp(40px,5.4vw,54px);
     box-shadow:0 4px 0 #b8791d;line-height:1;
   }
   .mini:active{transform:translateY(3px);box-shadow:0 1px 0 #b8791d}
+  .mini.apagado{filter:grayscale(1) brightness(.85);opacity:.7}
 
   /* ---------- escenario ---------- */
-  #stage{flex:1 1 auto;position:relative;background:#5bb3e0;min-height:0}
+  /* overflow hidden: así ningún cartel se sale del escenario ni tapa los botones */
+  #stage{flex:1 1 auto;position:relative;background:#5bb3e0;min-height:0;overflow:hidden}
   canvas{display:block;width:100%;height:100%;touch-action:none}
 
   /* ---------- barra de abajo ---------- */
   footer{
     flex:0 0 auto;background:linear-gradient(#8a5a2b,#6b4420);
-    border-top:5px solid #4d3016;padding:8px 10px;z-index:5;
-    box-shadow:0 -3px 10px rgba(0,0,0,.25);
+    border-top:5px solid #4d3016;padding:7px 8px;z-index:5;
+    box-shadow:0 -3px 10px rgba(0,0,0,.25);max-height:34vh;overflow:auto;
   }
-  .fila{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+  .fila{display:flex;align-items:center;gap:7px;justify-content:center;flex-wrap:wrap}
 
   .pieza{
     background:#ffe9b8;border:4px solid #a86b1e;border-radius:16px;
-    padding:5px 8px 4px;min-width:clamp(62px,8.4vw,96px);
+    padding:5px 8px 4px;min-width:clamp(58px,7.6vw,88px);
     display:flex;flex-direction:column;align-items:center;gap:1px;
     box-shadow:0 4px 0 #7d4c12;transition:transform .1s;
   }
-  .pieza .em{font-size:clamp(24px,3.6vw,38px);line-height:1.05}
-  .pieza .tx{font-size:clamp(10px,1.3vw,14px);font-weight:900;color:#6b3d06}
+  .pieza .em{font-size:clamp(22px,3.2vw,34px);line-height:1.05}
+  .pieza .tx{font-size:clamp(10px,1.2vw,13px);font-weight:900;color:#6b3d06}
   .pieza:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
   .pieza.on{background:#8ff07c;border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b;transform:translateY(-3px)}
 
-  .sep{width:4px;align-self:stretch;background:rgba(255,255,255,.25);border-radius:4px;margin:0 4px}
+  .sep{width:4px;align-self:stretch;background:rgba(255,255,255,.25);border-radius:4px;margin:0 3px}
 
   /* marcador de juego */
-  .marcador{display:flex;align-items:center;gap:clamp(10px,2vw,26px);justify-content:center;flex-wrap:wrap}
+  .marcador{display:flex;align-items:center;gap:clamp(8px,1.6vw,22px);justify-content:center;flex-wrap:wrap}
   .caja-marcador{
-    background:#ffe9b8;border:4px solid #a86b1e;border-radius:16px;padding:5px 14px;
+    background:#ffe9b8;border:4px solid #a86b1e;border-radius:16px;padding:4px 12px;
     display:flex;align-items:center;gap:8px;box-shadow:0 4px 0 #7d4c12;
   }
-  .caja-marcador .et{font-size:clamp(11px,1.4vw,16px);font-weight:900;color:#6b3d06}
-  .caja-marcador .val{font-size:clamp(19px,2.8vw,30px);letter-spacing:-2px;line-height:1}
+  .caja-marcador .et{font-size:clamp(10px,1.3vw,15px);font-weight:900;color:#6b3d06}
+  .caja-marcador .val{font-size:clamp(17px,2.6vw,28px);letter-spacing:-1px;line-height:1}
+  .colaAves{display:flex;gap:2px;align-items:center;min-height:34px}
+  .colaAves canvas{width:clamp(26px,3vw,34px);height:clamp(26px,3vw,34px)}
+  .colaAves canvas.gastado{opacity:.25;filter:grayscale(1)}
 
   /* ---------- ventanas ---------- */
   .capa{
     position:absolute;inset:0;display:none;place-items:center;
-    background:rgba(20,10,0,.55);backdrop-filter:blur(3px);z-index:10;padding:14px;
+    background:rgba(20,10,0,.55);backdrop-filter:blur(3px);z-index:10;padding:12px;
   }
   .capa.on{display:grid}
   .panel{
     background:linear-gradient(#fff8e2,#ffe9b8);border:7px solid #a86b1e;border-radius:26px;
-    padding:clamp(14px,3vw,30px);text-align:center;max-width:min(620px,94vw);
-    max-height:92%;overflow:auto;box-shadow:0 12px 0 #7d4c12,0 20px 44px rgba(0,0,0,.45);
+    padding:clamp(12px,2.6vw,26px);text-align:center;max-width:min(680px,95vw);
+    max-height:94%;overflow:auto;box-shadow:0 12px 0 #7d4c12,0 20px 44px rgba(0,0,0,.45);
     animation:pop .32s cubic-bezier(.2,1.5,.4,1);
   }
   @keyframes pop{from{transform:scale(.5) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
-  .panel h2{font-size:clamp(24px,5vw,44px);color:#c94a00;text-shadow:2px 2px 0 #fff;margin-bottom:6px}
-  .panel p{font-size:clamp(14px,2.2vw,20px);font-weight:700;color:#5a3a12;margin:8px 0;line-height:1.5}
-  .estrellas{font-size:clamp(34px,8vw,64px);letter-spacing:6px;margin:6px 0}
+  .panel h2{font-size:clamp(21px,4.4vw,40px);color:#c94a00;text-shadow:2px 2px 0 #fff;margin-bottom:4px}
+  .panel p{font-size:clamp(13px,2vw,19px);font-weight:700;color:#5a3a12;margin:6px 0;line-height:1.45}
+  .estrellas{font-size:clamp(30px,7vw,58px);letter-spacing:6px;margin:4px 0}
   .grande{
-    font-size:clamp(16px,2.6vw,24px);font-weight:900;color:#0d3d06;background:#6fd45c;
-    border:5px solid #2e7a20;border-radius:20px;padding:12px 22px;margin:6px;
+    font-size:clamp(15px,2.4vw,23px);font-weight:900;color:#0d3d06;background:#6fd45c;
+    border:5px solid #2e7a20;border-radius:20px;padding:11px 20px;margin:5px;
     box-shadow:0 6px 0 #2e7a20;display:inline-block;
   }
   .grande.azul{background:#68c8f5;border-color:#1b6d97;color:#04324a;box-shadow:0 6px 0 #1b6d97}
   .grande:active{transform:translateY(4px);box-shadow:0 2px 0 #2e7a20}
-  .pasos{text-align:left;display:inline-block;margin:6px auto}
-  .pasos li{font-size:clamp(14px,2.2vw,20px);font-weight:700;color:#5a3a12;margin:10px 0;list-style:none}
+  .pasos{text-align:left;display:inline-block;margin:4px auto}
+  .pasos li{font-size:clamp(13px,2vw,19px);font-weight:700;color:#5a3a12;margin:8px 0;list-style:none}
   .pasos li b{font-size:1.25em}
+
+  /* ---------- elegir pájaros ---------- */
+  .equipo{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+  .hueco{
+    position:relative;width:clamp(52px,7vw,66px);height:clamp(52px,7vw,66px);border-radius:16px;
+    border:5px dashed #c9a05a;background:#fff6dd;display:grid;place-items:center;
+    font-size:24px;color:#c9a05a;padding:0;
+  }
+  .hueco.lleno{border-style:solid;border-color:#1f7d0d;background:#eaffd9;box-shadow:0 4px 0 #1f7d0d}
+  .hueco canvas{width:86%;height:86%;pointer-events:none}
+  .listaAves{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0}
+  .carta{
+    width:clamp(78px,10vw,100px);background:#fff6dd;border:5px solid #a86b1e;border-radius:18px;
+    box-shadow:0 4px 0 #7d4c12;padding:3px 2px 5px;display:flex;flex-direction:column;
+    align-items:center;gap:0;
+  }
+  .carta:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
+  .carta canvas{width:clamp(48px,6vw,62px);height:clamp(48px,6vw,62px);pointer-events:none}
+  .carta .nm{font-size:clamp(10px,1.2vw,13px);font-weight:900;color:#6b3d06;line-height:1.15}
+  .carta .pw{font-size:clamp(9px,1.1vw,12px);font-weight:700;color:#8a5a2b;line-height:1.15}
+  .carta.dentro{border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b}
+  .tituserie{width:100%;font-size:clamp(11px,1.4vw,15px);font-weight:900;color:#a86b1e;
+             text-align:left;margin:6px 0 0;border-top:3px dashed #d9b273;padding-top:4px}
+
+  /* ---------- mapa de niveles ---------- */
+  .mapa{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0}
+  .lvl{
+    width:clamp(52px,6.6vw,66px);background:#fff6dd;border:5px solid #a86b1e;border-radius:16px;
+    box-shadow:0 4px 0 #7d4c12;padding:4px 2px 3px;display:flex;flex-direction:column;align-items:center;
+  }
+  .lvl .n{font-size:clamp(15px,2vw,21px);font-weight:900;color:#6b3d06;line-height:1}
+  .lvl .es{font-size:clamp(9px,1.1vw,12px);letter-spacing:-1px;line-height:1.1}
+  .lvl.hecho{background:#eaffd9;border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d}
+  .lvl.actual{outline:4px solid #ffd93b}
+  .lvl:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
 
   /* ---------- taller de pájaros (foto) ---------- */
   .oculto{display:none !important}
   #lienzoPrevio{
-    width:min(300px,68vw);height:min(300px,68vw);border-radius:24px;
+    width:min(260px,60vw);height:min(260px,60vw);border-radius:24px;
     background:linear-gradient(#8fd8ff,#dff3fb);border:5px solid #a86b1e;
-    display:block;margin:8px auto;box-shadow:inset 0 4px 14px rgba(0,0,0,.18);
+    display:block;margin:6px auto;box-shadow:inset 0 4px 14px rgba(0,0,0,.18);
   }
-  .galeria{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+  .galeria{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}
   .tarjeta{
-    position:relative;width:82px;height:82px;border-radius:18px;background:#bfe6fa;
+    position:relative;width:76px;height:76px;border-radius:18px;background:#bfe6fa;
     border:5px solid #a86b1e;box-shadow:0 4px 0 #7d4c12;display:grid;place-items:center;
     overflow:visible;padding:0;
   }
   .tarjeta img{width:88%;height:88%;object-fit:contain;pointer-events:none}
-  .tarjeta.on{border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b;transform:translateY(-3px)}
+  .tarjeta.on{border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b}
   .tarjeta .x{
-    position:absolute;top:-10px;right:-10px;width:28px;height:28px;border-radius:50%;
-    background:#ff5252;color:#fff;font-weight:900;font-size:15px;border:3px solid #fff;
+    position:absolute;top:-10px;right:-10px;width:26px;height:26px;border-radius:50%;
+    background:#ff5252;color:#fff;font-weight:900;font-size:14px;border:3px solid #fff;
     display:grid;place-items:center;line-height:1;padding:0;
   }
-  .ajuste{display:flex;gap:8px;justify-content:center;align-items:center;margin:6px 0;flex-wrap:wrap}
+  .ajuste{display:flex;gap:7px;justify-content:center;align-items:center;margin:5px 0;flex-wrap:wrap}
   .ajuste button{
-    background:#ffe9b8;border:4px solid #a86b1e;border-radius:14px;padding:7px 13px;
-    font-weight:900;font-size:clamp(12px,1.9vw,16px);color:#6b3d06;box-shadow:0 4px 0 #7d4c12;
+    background:#ffe9b8;border:4px solid #a86b1e;border-radius:14px;padding:7px 12px;
+    font-weight:900;font-size:clamp(11px,1.7vw,15px);color:#6b3d06;box-shadow:0 4px 0 #7d4c12;
   }
   .ajuste button:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
-  .consejo{font-size:clamp(11px,1.7vw,15px);color:#7a5a2a;font-weight:700}
+  .consejo{font-size:clamp(10px,1.5vw,14px);color:#7a5a2a;font-weight:700}
 
-  /* aviso flotante */
+  /* aviso flotante: nunca tapa el juego ni se puede tocar */
   #aviso{
-    position:absolute;left:50%;top:14px;transform:translate(-50%,-140%);
-    background:#ff5252;color:#fff;font-weight:900;font-size:clamp(14px,2.2vw,20px);
-    padding:10px 20px;border-radius:16px;border:4px solid #fff;
+    position:absolute;left:50%;top:8px;transform:translate(-50%,-160%);
+    background:rgba(255,82,82,.94);color:#fff;font-weight:900;font-size:clamp(13px,2vw,19px);
+    padding:8px 18px;border-radius:16px;border:4px solid #fff;pointer-events:none;
     box-shadow:0 6px 16px rgba(0,0,0,.4);z-index:9;transition:transform .3s;white-space:nowrap;
   }
   #aviso.on{transform:translate(-50%,0)}
 
   @media (max-height:560px){
     .pieza .tx{display:none}
-    .pieza{min-width:54px;padding:4px 6px}
-    .logo small{display:none}
+    .pieza{min-width:50px;padding:4px 6px}
+    .logo{display:none}
+  }
+  @media (max-width:620px){
+    .logo{display:none}
+    .modo{padding:6px 9px}
   }
 </style>
 </head>
@@ -157,16 +200,18 @@
 <div id="app">
 
   <header>
-    <div class="logo">🐦 PÁJAROS LOCOS<small>construye y juega</small></div>
-    <div class="spacer"></div>
+    <div class="logo">🐦 PÁJAROS LOCOS</div>
     <div class="modos">
+      <button class="modo" id="btnNiveles">🗺️ NIVELES</button>
       <button class="modo on" id="btnConstruir">🔨 CONSTRUIR</button>
       <button class="modo" id="btnJugar">🚀 ¡JUGAR!</button>
     </div>
     <div class="spacer"></div>
-    <button class="modo" id="btnTaller" title="Convierte tu dibujo en pájaro">📷 MI PÁJARO</button>
-    <button class="mini" id="btnAyuda" title="Ayuda">❓</button>
+    <button class="mini" id="btnAves" title="Elegir mis pájaros">🐦</button>
+    <button class="mini" id="btnTaller" title="Convierte tu dibujo en pájaro">📷</button>
+    <button class="mini" id="btnMusica" title="Música">🎵</button>
     <button class="mini" id="btnSonido" title="Sonido">🔊</button>
+    <button class="mini" id="btnAyuda" title="Ayuda">❓</button>
   </header>
 
   <div id="stage">
@@ -178,8 +223,9 @@
         <h2 id="finTitulo">¡BIEN HECHO!</h2>
         <div class="estrellas" id="finEstrellas">⭐⭐⭐</div>
         <p id="finTexto">Has ganado</p>
-        <button class="grande" id="finOtra">🔄 Otra vez</button>
-        <button class="grande azul" id="finConstruir">🔨 Construir</button>
+        <button class="grande" id="finSiguiente">⏭️ SIGUIENTE</button>
+        <button class="grande azul" id="finOtra">🔄 Otra vez</button>
+        <button class="grande azul" id="finMapa">🗺️ Niveles</button>
       </div>
     </div>
 
@@ -187,15 +233,40 @@
       <div class="panel">
         <h2>¿Cómo se juega?</h2>
         <ul class="pasos">
-          <li><b>1️⃣ 🔨</b> Toca una pieza de abajo y luego toca el cielo para ponerla.</li>
-          <li><b>2️⃣ 🐷</b> ¡No olvides poner cerditos! Son los malos.</li>
-          <li><b>3️⃣ 🚀</b> Pulsa <b>¡JUGAR!</b>, estira el pájaro hacia atrás y suéltalo.</li>
-          <li><b>4️⃣ 🏆</b> Tira todos los cerditos y… ¡has ganado!</li>
+          <li><b>1️⃣ 🗺️</b> En <b>NIVELES</b> tienes 30 niveles, cada uno más difícil.</li>
+          <li><b>2️⃣ 🔨</b> En <b>CONSTRUIR</b> haces tu propio nivel: toca una pieza y toca el cielo.</li>
+          <li><b>3️⃣ 🚀</b> Estira el pájaro hacia atrás y suéltalo.</li>
+          <li><b>4️⃣ ✨</b> ¡Mientras vuela, <b>toca la pantalla</b> y usa su poder!</li>
+          <li><b>5️⃣ 🐦</b> En el botón <b>🐦</b> eliges qué pájaros quieres en el tirachinas.</li>
         </ul>
-        <p>🧽 = borrar &nbsp; ↩️ = deshacer &nbsp; 🎲 = ejemplo</p>
-        <p>📷 <b>MI PÁJARO</b>: ¡haz un dibujo en un papel, sácale una foto y volará!</p>
+        <p>🧽 borrar &nbsp; ↩️ deshacer &nbsp; 🎲 ejemplo &nbsp; 🎵 música</p>
+        <p>📷 <b>MI PÁJARO</b>: haz un dibujo, sácale una foto ¡y volará!</p>
         <p id="lineaApk" class="oculto"><a href="https://github.com/jsmcel/pajaros-locos/releases/latest" target="_blank" rel="noopener" style="color:#1b6d97;font-weight:900">📱 Descargar la app para Android (APK)</a></p>
         <button class="grande" id="ayudaOk">¡VALE!</button>
+      </div>
+    </div>
+
+    <div class="capa" id="capaNiveles">
+      <div class="panel">
+        <h2>🗺️ 30 niveles</h2>
+        <p>Del 1 al 30, cada vez más difícil. ¡Consigue las 3 estrellas!</p>
+        <div class="mapa" id="mapa"></div>
+        <button class="grande azul" id="nivelesCerrar">👍 LISTO</button>
+      </div>
+    </div>
+
+    <div class="capa" id="capaAves">
+      <div class="panel">
+        <h2>🐦 Mis pájaros</h2>
+        <p>Toca un pájaro y se pone en la fila del tirachinas 👇</p>
+        <div class="equipo" id="equipo"></div>
+        <div class="ajuste">
+          <button id="avesAzar">🎲 Al azar</button>
+          <button id="avesVariado">🌈 Variados</button>
+          <button id="avesVacia">🧽 Vaciar</button>
+        </div>
+        <div class="listaAves" id="listaAves"></div>
+        <button class="grande" id="avesListo">👍 LISTO</button>
       </div>
     </div>
 
@@ -221,7 +292,7 @@
           <button class="grande azul" id="btnOtraFoto">📸 Otra foto</button>
         </div>
 
-        <p style="margin-top:14px">Mis pájaros:</p>
+        <p style="margin-top:10px">Mis dibujos (tócalos para que jueguen):</p>
         <div class="galeria" id="galeria"></div>
 
         <button class="grande azul" id="tallerCerrar">👍 LISTO</button>
@@ -234,8 +305,9 @@
   <footer>
     <div class="fila" id="barraConstruir"></div>
     <div class="fila marcador" id="barraJugar" style="display:none">
-      <div class="caja-marcador"><span class="et">Pájaros</span><span class="val" id="marBirds">🐦🐦🐦</span></div>
+      <div class="caja-marcador"><span class="et">Pájaros</span><span class="val colaAves" id="marBirds"></span></div>
       <div class="caja-marcador"><span class="et">Cerditos</span><span class="val" id="marPigs">🐷 3</span></div>
+      <div class="caja-marcador oculto" id="cajaNivel"><span class="et">Nivel</span><span class="val" id="marNivel">1</span></div>
       <button class="pieza" id="btnOtra"><span class="em">🔄</span><span class="tx">OTRA VEZ</span></button>
     </div>
   </footer>
@@ -246,7 +318,11 @@
 <script>
 "use strict";
 /* ============================================================
-   PÁJAROS LOCOS — editor + juego estilo Angry Birds
+   PÁJAROS LOCOS
+   - 30 niveles hechos, de menos a más difícil
+   - editor de niveles (construye el tuyo)
+   - todos los pájaros de todas las series, cada uno con su poder
+   - música y sonidos sintetizados (sin archivos)
    Mundo virtual fijo de 1600x900 escalado al tamaño del canvas.
    ============================================================ */
 const { Engine, Bodies, Body, Composite, Events } = Matter;
@@ -257,8 +333,8 @@ const SLING = { x: 265, y: 800 };      // base del tirachinas
 const HORQ  = { x: 265, y: 622 };      // horquilla (donde descansa el pájaro)
 const ESTIRA_MAX = 150;                // cuánto se puede estirar
 const VEL_MAX = 37;                    // velocidad máxima de lanzamiento
-const PAJAROS_TOTAL = 5;
 const ZONA_X = 430;                    // no se puede construir a la izquierda de aquí
+const MAX_EQUIPO = 8;                  // cuántos pájaros caben en el tirachinas
 
 /* ---------- tipos de pieza ---------- */
 const TIPOS = {
@@ -269,48 +345,162 @@ const TIPOS = {
   ice:    { forma:'rect', w:80,  h:80,   hp:13, dens:0.0010, emoji:'🧊', nombre:'Hielo'    },
   stone:  { forma:'rect', w:80,  h:80,   hp:95, dens:0.0035, emoji:'🧱', nombre:'Piedra'   },
   tnt:    { forma:'rect', w:64,  h:64,   hp:6,  dens:0.0015, emoji:'💣', nombre:'TNT'      },
+  pigjefe:{ forma:'circ', r:46,          hp:52, dens:0.0016, emoji:'🐗', nombre:'Cerdo jefe' },
 };
-const ORDEN = ['pig','wood','beam','column','ice','stone','tnt'];
+const ORDEN = ['pig','pigjefe','wood','beam','column','ice','stone','tnt'];
 
 /* ---------- estado global ---------- */
 const S = {
   modo: 'construir',
-  piezas: [],            // [{t,x,y}]  ← el nivel del niño (nunca lo toca la física)
+  piezas: [],            // [{t,x,y}]  ← el nivel (nunca lo toca la física)
   herramienta: 'pig',
   historial: [],
-  arrastrando: null,     // pieza que se está moviendo en modo construir
+  arrastrando: null,
   raton: null,
   mudo: false,
   // juego
-  motor: null, cuerpos: [], particulas: [], pajaro: null,
-  pajarosUsados: 0, tirando: false, aim: null, quietoDesde: 0, calma: 0, finPuesto: false,
+  motor: null, cuerpos: [], particulas: [], aves: [], huevos: [],
+  pajarosUsados: 0, tirando: false, aim: null, calma: 0, finPuesto: false,
   sacudida: 0, tiempo: 0,
+  // equipo de pájaros y campaña
+  equipo: ['rojo','rayo','bomba','azules','blanca'],
+  nivel: 0,              // 0 = nivel propio (construido); 1..30 = campaña
+  estrellas: {},         // {nivel: 1..3}
 };
 
-/* pájaros dibujados por el niño (fotos convertidas) */
+/* dibujos del niño (fotos convertidas) */
 const MI = { img:null, lista:[], sel:-1, fuente:null, temp:null, umbral:62 };
 
 /* ============================================================
-   NIVELES DE EJEMPLO
+   LOS 30 NIVELES — de fácil a difícil
    ============================================================ */
-const EJEMPLOS = [
-  [ {t:'column',x:1000,y:710},{t:'column',x:1160,y:710},{t:'beam',x:1080,y:602},{t:'pig',x:1080,y:550} ],
-  [ {t:'column',x:900,y:710},{t:'column',x:1060,y:710},{t:'beam',x:980,y:602},
-    {t:'wood',x:980,y:544},{t:'pig',x:980,y:470},
-    {t:'column',x:1240,y:710},{t:'column',x:1400,y:710},{t:'beam',x:1320,y:602},{t:'pig',x:1320,y:550},
-    {t:'ice',x:1120,y:760} ],
-  [ {t:'stone',x:760,y:760},{t:'stone',x:840,y:760},{t:'beam',x:800,y:702},{t:'pig',x:800,y:650},
-    {t:'tnt',x:1000,y:768},
-    {t:'column',x:1150,y:710},{t:'column',x:1310,y:710},{t:'beam',x:1230,y:602},
-    {t:'ice',x:1230,y:544},{t:'pig',x:1230,y:470} ],
+function piezasOk(lista){
+  const buenas = [];
+  const caja = (t,x,y)=>{ const d=TIPOS[t];
+    const w = d.forma==='circ'? d.r*2 : d.w, h = d.forma==='circ'? d.r*2 : d.h;
+    return { x1:x-w/2, y1:y-h/2, x2:x+w/2, y2:y+h/2 }; };
+  for(const p of lista){
+    if(!TIPOS[p.t]) continue;
+    const c = caja(p.t,p.x,p.y);
+    if(c.x1 < ZONA_X || c.x2 > W-20 || c.y1 < 40 || c.y2 > SUELO+0.5) continue;
+    let choca = false;
+    for(const q of buenas){ const d=caja(q.t,q.x,q.y);
+      if(c.x1<d.x2-3 && c.x2>d.x1+3 && c.y1<d.y2-3 && c.y2>d.y1+3){ choca=true; break; } }
+    if(!choca) buenas.push(p);
+  }
+  return buenas;
+}
+
+/* pequeños ladrillos para montar niveles */
+const PISO = 216;                                     // columna(180) + viga(36)
+function base(p){ return SUELO - (p||0)*PISO; }
+function choza(x,p){ const b=base(p);
+  return [ {t:'column',x:x-72,y:b-90}, {t:'column',x:x+72,y:b-90}, {t:'beam',x,y:b-198} ]; }
+function chozaPiedra(x,p){ const b=base(p);
+  return [ {t:'stone',x:x-80,y:b-40}, {t:'stone',x:x-80,y:b-120},
+           {t:'stone',x:x+80,y:b-40}, {t:'stone',x:x+80,y:b-120}, {t:'beam',x,y:b-178} ]; }
+function dentro(x,p){ return [ {t:'pig',x,y:base(p)-34} ]; }
+function encima(x,p){ return [ {t:'pig',x,y:base(p)-250} ]; }
+function torre(x,n,t,p){ const a=[], b=base(p);
+  for(let i=0;i<n;i++) a.push({t:t||'wood',x,y:b-40-80*i}); return a; }
+function fila(x,n,t,p){ const a=[], b=base(p);
+  for(let i=0;i<n;i++) a.push({t:t||'wood',x:x+i*80,y:b-40}); return a; }
+function piramide(x,t,p){ const b=base(p), a=[];
+  [-80,0,80].forEach(dx=>a.push({t:t||'stone',x:x+dx,y:b-40}));
+  [-40,40].forEach(dx=>a.push({t:t||'stone',x:x+dx,y:b-120}));
+  a.push({t:t||'stone',x,y:b-200}); return a; }
+function cerdo(x,y){ return [ {t:'pig',x,y:(y===undefined?SUELO-34:y)} ]; }
+function tnt(x,p){ return [ {t:'tnt',x,y:base(p)-32} ]; }
+function techo(x,p){ const b=base(p); return [ {t:'beam',x,y:b-198} ]; }
+
+function N(equipo, ...grupos){
+  return { equipo, piezas: piezasOk([].concat.apply([],grupos)) };
+}
+
+const NIVELES = [
+  /* 1-5 — para empezar: una casita y poco más */
+  N(['rojo','rojo','rojo'], choza(1050), dentro(1050)),
+  N(['rojo','rojo','rojo'], choza(950), dentro(950), torre(1300,2), cerdo(1300,SUELO-194)),
+  N(['rojo','rayo','rojo'], choza(880), dentro(880), choza(1240), dentro(1240)),
+  N(['rojo','rayo','rojo'], choza(950), dentro(950), encima(950), fila(1260,3), cerdo(1340,SUELO-114)),
+  N(['rojo','rayo','azules','rojo'], choza(1000), dentro(1000), choza(1000,1), dentro(1000,1)),
+
+  /* 6-10 — llega el hielo, la piedra y el TNT */
+  N(['rojo','rayo','bomba','rojo'], choza(900), dentro(900), torre(1220,3,'ice'), cerdo(1220,SUELO-274), tnt(1080)),
+  N(['rojo','rayo','azules','rojo'], choza(820), dentro(820), choza(1120), dentro(1120), choza(1420), dentro(1420)),
+  N(['rayo','bomba','rojo','azules'], chozaPiedra(1000), dentro(1000), torre(1350,2,'ice'), cerdo(1350,SUELO-194)),
+  N(['rojo','rayo','bomba','rojo'], piramide(1150,'stone'), cerdo(1150,SUELO-274), fila(820,2,'ice'), cerdo(860,SUELO-114)),
+  N(['rojo','rayo','bomba','azules','rojo'], choza(900), dentro(900), choza(900,1), dentro(900,1),
+    torre(1300,4,'ice'), cerdo(1300,SUELO-354), tnt(1120)),
+
+  /* 11-15 — dos pisos y más cerditos */
+  N(['rayo','bomba','blanca','rojo'], chozaPiedra(880), dentro(880), choza(1240), dentro(1240), encima(1240)),
+  N(['rojo','rayo','azules','blanca'], choza(820), dentro(820), torre(1080,3,'ice'), cerdo(1080,SUELO-274),
+    choza(1380), dentro(1380)),
+  N(['bomba','rayo','rojo','azules','blanca'], chozaPiedra(1000), dentro(1000), chozaPiedra(1000,1), dentro(1000,1), tnt(1300)),
+  N(['rojo','rayo','bomba','bumeran'], choza(760), dentro(760), fila(1000,4,'ice'), cerdo(1040,SUELO-114),
+    cerdo(1200,SUELO-114), choza(1420), dentro(1420)),
+  N(['rayo','bomba','azules','blanca','rojo'], piramide(900,'stone'), cerdo(900,SUELO-274),
+    piramide(1300,'wood'), cerdo(1300,SUELO-274), tnt(1100)),
+
+  /* 16-20 — fortalezas */
+  N(['rojo','rayo','bomba','blanca','bumeran'], choza(820), dentro(820), choza(820,1), dentro(820,1),
+    chozaPiedra(1240), dentro(1240), cerdo(1500)),
+  N(['rayo','azules','bomba','plata','rojo'], torre(760,4,'ice'), cerdo(760,SUELO-354),
+    choza(1060), dentro(1060), encima(1060), torre(1400,4,'wood'), cerdo(1400,SUELO-354)),
+  N(['bomba','rayo','blanca','rojo','azules'], chozaPiedra(900), dentro(900), tnt(1100),
+    chozaPiedra(1300), dentro(1300), encima(1300)),
+  N(['rojo','rayo','bomba','burbuja','blanca'], choza(780), dentro(780), fila(1000,5,'stone'),
+    cerdo(1040,SUELO-114), cerdo(1200,SUELO-114), cerdo(1360,SUELO-114)),
+  N(['rayo','bomba','plata','azules','rojo'], choza(850), dentro(850), choza(850,1), dentro(850,1),
+    choza(1300), dentro(1300), choza(1300,1), dentro(1300,1), tnt(1075)),
+
+  /* 21-25 — de verdad difícil */
+  N(['bomba','rayo','hielo','blanca','rojo'], chozaPiedra(880), dentro(880), chozaPiedra(880,1), dentro(880,1),
+    torre(1300,5,'ice'), cerdo(1300,SUELO-434), cerdo(1500)),
+  N(['rayo','laser','bomba','azules','blanca'], piramide(820,'stone'), cerdo(820,SUELO-274),
+    piramide(1120,'stone'), cerdo(1120,SUELO-274), piramide(1420,'stone'), cerdo(1420,SUELO-274)),
+  N(['rojo','rayo','bomba','bumeran','plata'], choza(760), dentro(760), encima(760),
+    chozaPiedra(1080), dentro(1080), choza(1400), dentro(1400), encima(1400), tnt(920)),
+  N(['bomba','hielo','rayo','blanca','azules'], torre(700,5,'stone'), cerdo(700,SUELO-434),
+    choza(1020), dentro(1020), choza(1020,1), dentro(1020,1), torre(1380,5,'ice'), cerdo(1380,SUELO-434)),
+  N(['rayo','bomba','laser','blanca','rojo','azules'], chozaPiedra(820), dentro(820), chozaPiedra(820,1), dentro(820,1),
+    chozaPiedra(1260), dentro(1260), chozaPiedra(1260,1), dentro(1260,1), tnt(1040)),
+
+  /* 26-30 — para campeones */
+  N(['bomba','rayo','aguila','blanca','azules'], piramide(760,'stone'), cerdo(760,SUELO-274),
+    choza(1080), dentro(1080), choza(1080,1), dentro(1080,1), encima(1080,1),
+    torre(1420,5,'ice'), cerdo(1420,SUELO-434)),
+  N(['rayo','bomba','hielo','plata','blanca'], fila(700,3,'stone'), cerdo(780,SUELO-114),
+    choza(1080), dentro(1080), encima(1080), chozaPiedra(1420), dentro(1420), tnt(940), tnt(1260)),
+  N(['bomba','laser','rayo','azules','blanca','rojo'], chozaPiedra(760), dentro(760), chozaPiedra(760,1), dentro(760,1),
+    torre(1080,6,'ice'), cerdo(1080,SUELO-514), chozaPiedra(1400), dentro(1400), chozaPiedra(1400,1), dentro(1400,1)),
+  N(['rayo','bomba','aguila','hielo','blanca'], piramide(720,'stone'), cerdo(720,SUELO-274),
+    piramide(1020,'stone'), cerdo(1020,SUELO-274), piramide(1320,'stone'), cerdo(1320,SUELO-274),
+    torre(1500,4,'ice'), cerdo(1500,SUELO-354), tnt(870), tnt(1170)),
+  N(['aguila','bomba','rayo','laser','blanca','azules'], chozaPiedra(700), dentro(700), chozaPiedra(700,1), dentro(700,1),
+    choza(1020), dentro(1020), choza(1020,1), dentro(1020,1), encima(1020,1),
+    chozaPiedra(1340), dentro(1340), chozaPiedra(1340,1), dentro(1340,1), tnt(860), tnt(1180), cerdo(1520)),
 ];
+
+/* niveles sueltos del botón 🎲 dentro del editor */
+const EJEMPLOS = [ NIVELES[1].piezas, NIVELES[6].piezas, NIVELES[12].piezas ];
 let ejemploN = 0;
 
 /* ============================================================
-   SONIDO (sintetizado, sin archivos)
+   SONIDO Y MÚSICA (sintetizados, sin archivos)
    ============================================================ */
-let actx = null;
-function ac(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+let actx = null, salidaSFX = null, salidaMUS = null;
+function ac(){
+  if(!actx){
+    try{
+      actx = new (window.AudioContext||window.webkitAudioContext)();
+      salidaSFX = actx.createGain(); salidaSFX.gain.value = 0.9; salidaSFX.connect(actx.destination);
+      salidaMUS = actx.createGain(); salidaMUS.gain.value = 0;   salidaMUS.connect(actx.destination);
+    }catch(e){}
+  }
+  return actx;
+}
 function tono(f1,f2,dur,tipo,vol){
   if(S.mudo) return; const a=ac(); if(!a) return;
   const o=a.createOscillator(), g=a.createGain();
@@ -318,7 +508,7 @@ function tono(f1,f2,dur,tipo,vol){
   if(f2) o.frequency.exponentialRampToValueAtTime(Math.max(30,f2),a.currentTime+dur);
   g.gain.setValueAtTime(vol||0.18,a.currentTime);
   g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
-  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+dur);
+  o.connect(g); g.connect(salidaSFX||a.destination); o.start(); o.stop(a.currentTime+dur);
 }
 function ruido(dur,vol,filtro){
   if(S.mudo) return; const a=ac(); if(!a) return;
@@ -327,7 +517,7 @@ function ruido(dur,vol,filtro){
   const s=a.createBufferSource(); s.buffer=b;
   const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=filtro||900;
   const g=a.createGain(); g.gain.value=vol||0.25;
-  s.connect(f); f.connect(g); g.connect(a.destination); s.start();
+  s.connect(f); f.connect(g); g.connect(salidaSFX||a.destination); s.start();
 }
 const SFX = {
   clic:  ()=>tono(700,900,.07,'square',.10),
@@ -339,14 +529,95 @@ const SFX = {
   rompe: ()=>{ ruido(.22,.32,2200); tono(500,120,.2,'square',.10); },
   cerdo: ()=>{ tono(900,1500,.10,'sine',.22); tono(1500,300,.16,'triangle',.16); },
   boom:  ()=>{ ruido(.55,.5,300); tono(120,40,.5,'sawtooth',.28); },
+  poder: ()=>{ tono(880,1760,.16,'square',.14); tono(1320,660,.18,'triangle',.10); },
+  hielo: ()=>{ tono(1800,900,.3,'triangle',.14); ruido(.3,.14,4000); },
   gana:  ()=>{ [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tono(f,f*1.5,.28,'triangle',.20),i*130)); },
   falla: ()=>{ [400,330,260].forEach((f,i)=>setTimeout(()=>tono(f,f*.8,.24,'sine',.16),i*150)); },
 };
 
+/* ---------- la musiquilla: marcha de pájaros en re menor ---------- */
+const MUS = {
+  on:true, arrancada:false, prox:0, paso:0, timer:null,
+  bpm:128,
+};
+const nota = n => 440*Math.pow(2,(n-69)/12);
+/* 8 compases de 8 corcheas */
+const RAICES  = [38,38,34,34,41,41,45,45];                    // Dm Dm Bb Bb F F A A
+const ACORDES = [[50,53,57],[50,53,57],[46,50,53],[46,50,53],
+                 [53,57,60],[53,57,60],[45,49,52],[45,49,52]];
+const BAJO    = [0,0,7,0,12,0,7,0];                           // dibujo del bajo por compás
+const MELO = [
+  69,69, 0,72, 0,69,67,65,
+  64, 0,64,65,67, 0,64,62,
+  65,65, 0,69, 0,65,64,62,
+  62, 0,62,64,65, 0,62, 0,
+  69, 0,72,74, 0,72,69,67,
+  65, 0,69,72, 0,69,67,65,
+  64, 0,67,69, 0,67,64,73,
+  74, 0, 0,69, 0,65,62, 0,
+];
+function voz(f,t,dur,tipo,vol){
+  const a=ac(); if(!a||!salidaMUS) return;
+  const o=a.createOscillator(), g=a.createGain();
+  o.type=tipo; o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol,t+0.014);
+  g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
+  o.connect(g); g.connect(salidaMUS); o.start(t); o.stop(t+dur+0.05);
+}
+function percu(t,dur,vol,filtro,tipo){
+  const a=ac(); if(!a||!salidaMUS) return;
+  const n=Math.max(1,Math.floor(a.sampleRate*dur)), b=a.createBuffer(1,n,a.sampleRate), d=b.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
+  const s=a.createBufferSource(); s.buffer=b;
+  const f=a.createBiquadFilter(); f.type=tipo||'lowpass'; f.frequency.value=filtro;
+  const g=a.createGain(); g.gain.value=vol;
+  s.connect(f); f.connect(g); g.connect(salidaMUS); s.start(t); s.stop(t+dur);
+}
+function tocaPaso(p, t){
+  const compas = (p>>3) & 7, dentroC = p & 7, dur = 30/MUS.bpm;
+  // bajo
+  const raiz = RAICES[compas] + BAJO[dentroC];
+  voz(nota(raiz), t, dur*0.9, 'square', 0.16);
+  voz(nota(raiz-12), t, dur*0.9, 'sine', 0.13);
+  // acorde suave al empezar el compás
+  if(dentroC===0) ACORDES[compas].forEach(n=>voz(nota(n), t, dur*3.4, 'triangle', 0.045));
+  // melodía
+  const m = MELO[p & 63];
+  if(m) { voz(nota(m), t, dur*1.25, 'sawtooth', 0.075); voz(nota(m+12), t, dur*0.7, 'triangle', 0.035); }
+  // percusión de marcha
+  if(dentroC===0 || dentroC===4) percu(t, .12, .34, 180);
+  if(dentroC===2 || dentroC===6) percu(t, .10, .16, 2600, 'highpass');
+  percu(t, .035, .07, 7000, 'highpass');
+}
+function planificaMusica(){
+  const a=ac(); if(!a || !MUS.on) return;
+  if(a.state==='suspended') return;
+  const paso = 30/MUS.bpm;
+  if(MUS.prox < a.currentTime) MUS.prox = a.currentTime + 0.08;
+  while(MUS.prox < a.currentTime + 0.35){
+    tocaPaso(MUS.paso, MUS.prox);
+    MUS.paso = (MUS.paso+1) & 63;
+    MUS.prox += paso;
+  }
+}
+function musicaVolumen(v){
+  const a=ac(); if(!a||!salidaMUS) return;
+  salidaMUS.gain.cancelScheduledValues(a.currentTime);
+  salidaMUS.gain.setTargetAtTime(v, a.currentTime, 0.25);
+}
+function musicaEnciende(){
+  const a=ac(); if(!a) return;
+  if(a.state==='suspended') a.resume();
+  if(!MUS.arrancada){ MUS.arrancada=true; MUS.prox=a.currentTime+0.1; MUS.timer=setInterval(planificaMusica,60); }
+  musicaVolumen(MUS.on ? 0.34 : 0);
+}
+
 /* ============================================================
    CANVAS Y ESCALADO
    ============================================================ */
-const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const cv = document.getElementById('c');
+let ctx = cv.getContext('2d');
 const vista = { esc:1, ox:0, oy:0 };
 function medir(){
   const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio||1, 2);
@@ -363,6 +634,95 @@ function aMundo(ev){
 }
 
 /* ============================================================
+   TODOS LOS PÁJAROS — el plantel completo de todas las series.
+   Cada uno con SU poder del juego original; los invitados nuevos
+   llevan un poder inventado.
+   ============================================================ */
+const PODERES = {
+  ninguno:       { icono:'💪', nombre:'Fuerza',    que:'No necesita poder: es enorme' },
+  grito:         { icono:'💥', nombre:'Grito',     que:'Pega un grito y empuja todo' },
+  acelera:       { icono:'⚡', nombre:'Acelerón',  que:'Sale disparado a toda pastilla' },
+  explota:       { icono:'💣', nombre:'Bombazo',   que:'¡BOOM! Explota donde esté' },
+  divide:        { icono:'3️⃣', nombre:'Trillizos', que:'Se convierte en tres pájaros' },
+  huevo:         { icono:'🥚', nombre:'Huevo',     que:'Suelta un huevo que explota' },
+  vuelve:        { icono:'🪃', nombre:'Bumerán',   que:'Da la vuelta y ataca por detrás' },
+  hincha:        { icono:'🎈', nombre:'Globo',     que:'Se hincha y se hace gigante' },
+  burbujas:      { icono:'🫧', nombre:'Burbujas',  que:'Levanta las cosas por el aire' },
+  picado:        { icono:'🌀', nombre:'Picado',    que:'Cae en picado como un cohete' },
+  congela:       { icono:'❄️', nombre:'Hielo',     que:'Congela todo: se rompe solo' },
+  laser:         { icono:'🎯', nombre:'Puntería',  que:'Va a donde tú toques' },
+  furia:         { icono:'🦅', nombre:'Furia',     que:'Se lanza con toda su fuerza' },
+  salto:         { icono:'🦘', nombre:'Rebote',    que:'Da un supersalto' },
+  teletransporte:{ icono:'✨', nombre:'Chispa',    que:'Aparece más adelante de golpe' },
+  tambor:        { icono:'🥁', nombre:'Tambor',    que:'Un tamborazo que empuja fuerte' },
+  tren:          { icono:'🚂', nombre:'Vapor',     que:'Sale de frente como un tren' },
+  turbo:         { icono:'🏎️', nombre:'Turbo',     que:'Nitro: acelera y arrasa' },
+  tropa:         { icono:'👥', nombre:'Tropa',     que:'Llama a sus amigos: se hace cuatro' },
+  zarpazo:       { icono:'🐻', nombre:'Zarpazo',   que:'Un zarpazo que revienta la madera' },
+  ruedas:        { icono:'🛞', nombre:'Ruedas',    que:'Pisa el acelerador y arrolla' },
+};
+
+const AVES = {
+  rojo:     { nombre:'Rojo',      serie:'Los clásicos', r:26, dens:.0050, pot:1.00, poder:'grito',
+              forma:'redondo', cuerpo:'#e0322a', panza:'#f8d0a0', borde:'#8f1414',
+              pico:'#ffa41c', picoB:'#d97b00', copete:'plumas', cola:'plumas', cejas:'enfado' },
+  rayo:     { nombre:'Rayo',      serie:'Los clásicos', r:24, dens:.0042, pot:1.05, poder:'acelera',
+              forma:'triangulo', cuerpo:'#ffd21e', panza:'#fff0a8', borde:'#c68f00',
+              pico:'#ff8b1f', picoB:'#c85e00', copete:'pincho', cola:'punta', cejas:'enfado' },
+  bomba:    { nombre:'Bomba',     serie:'Los clásicos', r:30, dens:.0075, pot:1.35, poder:'explota',
+              forma:'redondo', cuerpo:'#3d3d47', panza:'#5b5b68', borde:'#17171c',
+              pico:'#ff9a1f', picoB:'#c96a00', copete:'mecha', cola:'plumas', cejas:'enfado' },
+  azules:   { nombre:'Los Azules',serie:'Los clásicos', r:19, dens:.0042, pot:.75, poder:'divide',
+              forma:'redondo', cuerpo:'#3aa8f0', panza:'#d3f0ff', borde:'#1c6ea8',
+              pico:'#ffb52e', picoB:'#d18100', copete:'plumitas', cola:'punta', cejas:'normal' },
+  blanca:   { nombre:'Blanca',    serie:'Los clásicos', r:28, dens:.0055, pot:1.10, poder:'huevo',
+              forma:'huevo', cuerpo:'#fdfdf6', panza:'#e8e8d8', borde:'#c2bda6',
+              pico:'#ff9f1c', picoB:'#cc7400', copete:'mono', cola:'abanico', cejas:'normal' },
+  bumeran:  { nombre:'Bumerán',   serie:'Los clásicos', r:25, dens:.0050, pot:1.05, poder:'vuelve',
+              forma:'redondo', cuerpo:'#2fae72', panza:'#c6f2da', borde:'#177a4c',
+              pico:'#ffd23f', picoB:'#c99b00', picoLargo:true, copete:'flequillo', cola:'punta', cejas:'normal' },
+  grandote: { nombre:'Grandote',  serie:'Los clásicos', r:42, dens:.0075, pot:1.85, poder:'ninguno',
+              forma:'redondo', cuerpo:'#c8281f', panza:'#f3c294', borde:'#76100a',
+              pico:'#ff9a1f', picoB:'#c96a00', copete:'plumas', cola:'abanico', cejas:'enfado' },
+  burbuja:  { nombre:'Burbuja',   serie:'Los clásicos', r:21, dens:.0044, pot:.85, poder:'hincha',
+              forma:'redondo', cuerpo:'#ff8b1f', panza:'#ffdcae', borde:'#bf5a00',
+              pico:'#ffd23f', picoB:'#c99b00', copete:'plumitas', cola:'punta', cejas:'normal' },
+  plata:    { nombre:'Plata',     serie:'Los clásicos', r:26, dens:.0052, pot:1.15, poder:'picado',
+              forma:'huevo', cuerpo:'#ccd2dc', panza:'#f3f6fa', borde:'#828c9c',
+              pico:'#ffb52e', picoB:'#d18100', copete:'flequillo', cola:'abanico', cejas:'normal' },
+  rosa:     { nombre:'Rosa',      serie:'Equipo Rosa',  r:24, dens:.0048, pot:1.00, poder:'burbujas',
+              forma:'redondo', cuerpo:'#ff7bc0', panza:'#ffdaee', borde:'#c33e80',
+              pico:'#ffb52e', picoB:'#d18100', copete:'mono', cola:'abanico', cejas:'normal', flor:true },
+  amapola:  { nombre:'Amapola',   serie:'Equipo Rosa',  r:22, dens:.0044, pot:.95, poder:'tambor',
+              forma:'redondo', cuerpo:'#ff9d2e', panza:'#ffe3bd', borde:'#c46700',
+              pico:'#ffd23f', picoB:'#c99b00', copete:'diadema', cola:'abanico', cejas:'normal' },
+  lucas:    { nombre:'Lucas',     serie:'Equipo Rosa',  r:17, dens:.0040, pot:.60, poder:'salto',
+              forma:'redondo', cuerpo:'#5ec8ff', panza:'#e2f7ff', borde:'#2b86bd',
+              pico:'#ffb52e', picoB:'#d18100', copete:'plumitas', cola:'punta', cejas:'normal', rebote:.74 },
+  dalia:    { nombre:'Dalia',     serie:'Equipo Rosa',  r:24, dens:.0048, pot:1.00, poder:'teletransporte',
+              forma:'huevo', cuerpo:'#ffe14d', panza:'#fff8cd', borde:'#c9a400',
+              pico:'#ffb52e', picoB:'#d18100', copete:'mono', cola:'abanico', cejas:'gafas' },
+  hielo:    { nombre:'Hielo',     serie:'En el espacio',r:26, dens:.0048, pot:1.00, poder:'congela',
+              forma:'redondo', cuerpo:'#8fe3ff', panza:'#e9fbff', borde:'#3fa8d6',
+              pico:'#ffd23f', picoB:'#c99b00', copete:'pincho', cola:'punta', cejas:'normal', brillo:true },
+  laser:    { nombre:'Láser',     serie:'En el espacio',r:23, dens:.0046, pot:1.05, poder:'laser',
+              forma:'triangulo', cuerpo:'#a06bff', panza:'#e4d5ff', borde:'#5b2bab',
+              pico:'#ffb52e', picoB:'#d18100', copete:'pincho', cola:'punta', cejas:'gafas' },
+  aguila:   { nombre:'Águila',    serie:'La leyenda',   r:46, dens:.0090, pot:2.40, poder:'furia',
+              forma:'redondo', cuerpo:'#8a5a2b', panza:'#e9d8b8', borde:'#4d2f12',
+              pico:'#ffd23f', picoB:'#c99b00', picoGrande:true, capucha:'#f7f2e6',
+              copete:'plumas', copeteColor:'#e6dcc6', cola:'abanico', cejas:'enfado' },
+};
+const ORDEN_AVES = ['rojo','rayo','bomba','azules','blanca','bumeran','grandote','burbuja','plata',
+                    'rosa','amapola','lucas','dalia','hielo','laser','aguila'];
+
+/* pájaros de fuera del catálogo: los invitados (fotos recortadas) y los dibujos del niño */
+const EXTRA = {};
+function getAve(id){ return AVES[id] || EXTRA[id] || AVES.rojo; }
+function poderDe(a){ return PODERES[a.poder] || PODERES.ninguno; }
+function todosLosIds(){ return ORDEN_AVES.concat(Object.keys(EXTRA)); }
+
+/* ============================================================
    DIBUJO
    ============================================================ */
 const nubes = [{x:250,y:130,s:1.2},{x:820,y:90,s:.9},{x:1320,y:170,s:1.1},{x:1080,y:250,s:.7}];
@@ -371,7 +731,6 @@ function fondo(){
   const g = ctx.createLinearGradient(0,0,0,SUELO);
   g.addColorStop(0,'#5fb8ea'); g.addColorStop(.6,'#a8ddf5'); g.addColorStop(1,'#dff3fb');
   ctx.fillStyle=g; ctx.fillRect(0,0,W,SUELO+4);
-  // sol
   ctx.save(); ctx.translate(1430,110);
   ctx.fillStyle='rgba(255,240,150,.35)'; ctx.beginPath(); ctx.arc(0,0,96,0,7); ctx.fill();
   ctx.fillStyle='#ffdf4d'; ctx.beginPath(); ctx.arc(0,0,58,0,7); ctx.fill();
@@ -379,7 +738,6 @@ function fondo(){
   for(let i=0;i<10;i++){ const a=i*Math.PI/5 + S.tiempo*0.004;
     ctx.beginPath(); ctx.moveTo(Math.cos(a)*68,Math.sin(a)*68); ctx.lineTo(Math.cos(a)*88,Math.sin(a)*88); ctx.stroke(); }
   ctx.restore();
-  // nubes
   ctx.fillStyle='rgba(255,255,255,.92)';
   nubes.forEach(n=>{
     const x = ((n.x + S.tiempo*0.16*n.s) % (W+320)) - 160;
@@ -388,7 +746,6 @@ function fondo(){
       ctx.beginPath(); ctx.arc(c[0],c[1],c[2],0,7); ctx.fill(); });
     ctx.restore();
   });
-  // colinas
   ctx.fillStyle='#8fd97a';
   ctx.beginPath(); ctx.moveTo(0,SUELO);
   ctx.quadraticCurveTo(230,600,470,SUELO); ctx.quadraticCurveTo(760,590,1080,SUELO);
@@ -422,65 +779,194 @@ function gomas(px,py){
   ctx.beginPath(); ctx.moveTo(SLING.x+40,SLING.y-178); ctx.lineTo(px,py); ctx.stroke();
 }
 
-function pajaro(x,y,ang,r){
-  r = r||26;
-  // si el niño ha hecho su propio pájaro con una foto, lo usamos
-  if(MI.img && MI.img.complete && MI.img.naturalWidth){
-    const im=MI.img, lado=r*2.75, k=Math.min(lado/im.naturalWidth, lado/im.naturalHeight);
+/* ---------- un pájaro cualquiera ---------- */
+function siluetaAve(forma,r){
+  ctx.beginPath();
+  if(forma==='triangulo'){
+    const R=r*1.22;
+    ctx.moveTo(0,-R*1.05);
+    ctx.quadraticCurveTo(R*.98,R*.52, R*.60,R*.88);
+    ctx.quadraticCurveTo(0,R*1.10, -R*.60,R*.88);
+    ctx.quadraticCurveTo(-R*.98,R*.52, 0,-R*1.05);
+  } else if(forma==='huevo'){
+    ctx.ellipse(0,r*.04,r*.94,r*1.08,0,0,7);
+  } else {
+    ctx.arc(0,0,r,0,7);
+  }
+  ctx.closePath();
+}
+
+function dibujaAve(a, x, y, ang, r){
+  r = r || a.r || 26;
+  if(a.img){                                    // invitado recortado o dibujo del niño
+    const im = a.img;
+    if(!(im.complete && im.naturalWidth)){ aveCargando(x,y,r); return; }
+    const lado=r*3.05, k=Math.min(lado/im.naturalWidth, lado/im.naturalHeight);
     const w=im.naturalWidth*k, h=im.naturalHeight*k;
     ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+    if(a.voltea) ctx.scale(-1,1);            // el dibujo miraba al revés
     ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); return;
   }
   ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
-  // cola
-  ctx.fillStyle='#8f1414';
-  ctx.beginPath(); ctx.moveTo(-r*.7,0); ctx.lineTo(-r*1.85,-r*.55); ctx.lineTo(-r*1.7,r*.2); ctx.closePath(); ctx.fill();
-  // cuerpo
-  ctx.fillStyle='#e0322a'; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
-  ctx.fillStyle='#f8d0a0'; ctx.beginPath(); ctx.ellipse(r*.12,r*.42,r*.55,r*.4,0,0,7); ctx.fill();
-  ctx.strokeStyle='#8f1414'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.stroke();
-  // ojos
-  ctx.fillStyle='#fff';
-  ctx.beginPath(); ctx.ellipse(r*.22,-r*.24,r*.30,r*.34,0,0,7); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(r*.72,-r*.20,r*.24,r*.30,0,0,7); ctx.fill();
+  const B=a.borde, C=a.copeteColor||B;
+
+  ctx.fillStyle=C;
+  if(a.cola==='abanico'){
+    for(let i=-1;i<=1;i++){ ctx.save(); ctx.rotate(i*0.30);
+      ctx.beginPath(); ctx.moveTo(-r*.55,0); ctx.lineTo(-r*1.90,-r*.20); ctx.lineTo(-r*1.85,r*.22);
+      ctx.closePath(); ctx.fill(); ctx.restore(); }
+  } else if(a.cola==='punta'){
+    ctx.beginPath(); ctx.moveTo(-r*.6,0); ctx.lineTo(-r*1.75,-r*.52); ctx.lineTo(-r*1.55,r*.34);
+    ctx.closePath(); ctx.fill();
+  } else if(a.cola==='plumas'){
+    ctx.beginPath(); ctx.moveTo(-r*.7,0); ctx.lineTo(-r*1.85,-r*.55); ctx.lineTo(-r*1.7,r*.2);
+    ctx.closePath(); ctx.fill();
+  }
+
+  siluetaAve(a.forma,r);
+  ctx.fillStyle=a.cuerpo; ctx.fill();
+  ctx.save(); siluetaAve(a.forma,r); ctx.clip();
+  ctx.fillStyle=a.panza;
+  ctx.beginPath(); ctx.ellipse(r*.12,r*.52,r*.62,r*.46,0,0,7); ctx.fill();
+  if(a.capucha){ ctx.fillStyle=a.capucha;
+    ctx.beginPath(); ctx.ellipse(r*.12,-r*.42,r*.95,r*.72,0,0,7); ctx.fill(); }
+  ctx.restore();
+  siluetaAve(a.forma,r); ctx.strokeStyle=B; ctx.lineWidth=Math.max(2,r*.09); ctx.stroke();
+
+  ctx.fillStyle=C; ctx.strokeStyle=C; ctx.lineCap='round';
+  const cy = a.forma==='triangulo' ? -r*1.22 : -r*.96;
+  if(a.copete==='plumas'){
+    [[-.34,-1.05],[0,-1.2],[.34,-1.02]].forEach(([dx,dy])=>{
+      ctx.beginPath(); ctx.moveTo(r*dx-r*.16, cy+r*.12);
+      ctx.quadraticCurveTo(r*dx+r*.06, r*dy-r*.32, r*dx+r*.20, cy+r*.10);
+      ctx.closePath(); ctx.fill(); });
+  } else if(a.copete==='pincho'){
+    ctx.beginPath(); ctx.moveTo(-r*.26,cy+r*.16); ctx.lineTo(r*.30,cy-r*.86); ctx.lineTo(r*.30,cy+r*.10);
+    ctx.closePath(); ctx.fill();
+  } else if(a.copete==='plumitas'){
+    ctx.lineWidth=r*.16;
+    ctx.beginPath(); ctx.moveTo(-r*.10,cy+r*.10); ctx.lineTo(-r*.26,cy-r*.44); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( r*.18,cy+r*.08); ctx.lineTo( r*.30,cy-r*.46); ctx.stroke();
+  } else if(a.copete==='mono'){
+    ctx.beginPath(); ctx.arc(r*.02,cy-r*.20,r*.30,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(r*.30,cy-r*.02,r*.20,0,7); ctx.fill();
+  } else if(a.copete==='flequillo'){
+    ctx.beginPath(); ctx.moveTo(-r*.55,cy+r*.30);
+    ctx.quadraticCurveTo(r*.05,cy-r*.55, r*.62,cy+r*.26);
+    ctx.quadraticCurveTo(r*.05,cy+r*.02, -r*.55,cy+r*.30); ctx.fill();
+  } else if(a.copete==='diadema'){
+    ctx.lineWidth=r*.18; ctx.strokeStyle='#e0322a';
+    ctx.beginPath(); ctx.arc(0,-r*.16,r*.92,-Math.PI*.92,-Math.PI*.08); ctx.stroke();
+    ctx.fillStyle='#e0322a';
+    ctx.beginPath(); ctx.moveTo(-r*.52,cy+r*.12); ctx.lineTo(-r*.30,cy-r*.80); ctx.lineTo(-r*.14,cy+r*.06);
+    ctx.closePath(); ctx.fill();
+  } else if(a.copete==='mecha'){
+    ctx.strokeStyle='#c9a05a'; ctx.lineWidth=r*.13;
+    ctx.beginPath(); ctx.moveTo(0,cy+r*.10); ctx.quadraticCurveTo(r*.34,cy-r*.60, r*.06,cy-r*.86); ctx.stroke();
+    const ch = .6+Math.abs(Math.sin(S.tiempo*0.22))*.5;
+    ctx.fillStyle='#ffd93b'; ctx.beginPath(); ctx.arc(r*.06,cy-r*.92,r*.20*ch,0,7); ctx.fill();
+    ctx.fillStyle='#ff7b2e'; ctx.beginPath(); ctx.arc(r*.06,cy-r*.92,r*.11*ch,0,7); ctx.fill();
+  }
+
+  if(a.flor){
+    ctx.fillStyle='#ffe14d';
+    for(let i=0;i<5;i++){ const an=i*1.2566;
+      ctx.beginPath(); ctx.ellipse(-r*.66+Math.cos(an)*r*.20, -r*.72+Math.sin(an)*r*.20, r*.14,r*.14,0,0,7); ctx.fill(); }
+    ctx.fillStyle='#ff5fa2'; ctx.beginPath(); ctx.arc(-r*.66,-r*.72,r*.13,0,7); ctx.fill();
+  }
+
+  const ex1=r*.22, ex2=r*.72, ey=-r*.24;
+  if(a.cejas==='gafas'){
+    ctx.strokeStyle=B; ctx.lineWidth=r*.11;
+    ctx.beginPath(); ctx.moveTo(-r*.12,ey-r*.06); ctx.lineTo(ex2+r*.26,ey-r*.02); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.92)';
+    ctx.beginPath(); ctx.ellipse(ex1,ey,r*.32,r*.32,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ex2,ey,r*.28,r*.28,0,0,7); ctx.fill();
+    ctx.strokeStyle=B; ctx.lineWidth=r*.07;
+    ctx.beginPath(); ctx.arc(ex1,ey,r*.32,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(ex2,ey,r*.28,0,7); ctx.stroke();
+  } else {
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.ellipse(ex1,ey,r*.30,r*.34,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ex2,ey+r*.04,r*.24,r*.30,0,0,7); ctx.fill();
+  }
   ctx.fillStyle='#221';
-  ctx.beginPath(); ctx.arc(r*.30,-r*.22,r*.13,0,7); ctx.fill();
-  ctx.beginPath(); ctx.arc(r*.74,-r*.18,r*.11,0,7); ctx.fill();
-  // cejas enfadadas
-  ctx.strokeStyle='#2b1206'; ctx.lineWidth=r*.20; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(-r*.10,-r*.68); ctx.lineTo(r*.46,-r*.44); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo( r*.98,-r*.56); ctx.lineTo(r*.60,-r*.42); ctx.stroke();
-  // pico
-  ctx.fillStyle='#ffa41c';
-  ctx.beginPath(); ctx.moveTo(r*.66,r*.05); ctx.lineTo(r*1.34,r*.20); ctx.lineTo(r*.66,r*.40); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle='#d97b00'; ctx.lineWidth=1.6; ctx.stroke();
+  ctx.beginPath(); ctx.arc(ex1+r*.08,ey+r*.02,r*.13,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(ex2+r*.02,ey+r*.06,r*.11,0,7); ctx.fill();
+
+  if(a.cejas==='enfado'){
+    ctx.strokeStyle='#2b1206'; ctx.lineWidth=r*.20; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-r*.10,-r*.68); ctx.lineTo(r*.46,-r*.44); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( r*.98,-r*.56); ctx.lineTo(r*.60,-r*.42); ctx.stroke();
+  } else if(a.cejas==='normal'){
+    ctx.strokeStyle=B; ctx.lineWidth=r*.13; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-r*.02,-r*.66); ctx.lineTo(r*.42,-r*.62); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( r*.58,-r*.62); ctx.lineTo(r*.92,-r*.54); ctx.stroke();
+  }
+
+  const pl = a.picoGrande ? 1.75 : (a.picoLargo ? 1.95 : 1.34);
+  const pg = a.picoGrande ? .30 : (a.picoLargo ? .16 : .20);
+  ctx.fillStyle=a.pico;
+  ctx.beginPath(); ctx.moveTo(r*.62,r*.02); ctx.lineTo(r*pl,r*(pg+.02)); ctx.lineTo(r*.62,r*.44);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle=a.picoB||'#d97b00'; ctx.lineWidth=Math.max(1.2,r*.06); ctx.stroke();
+
+  if(a.brillo){
+    ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=r*.09;
+    [[-.5,.3,.26],[.1,-.62,.2]].forEach(([bx,by,bs])=>{
+      for(let i=0;i<3;i++){ const an=i*Math.PI/3;
+        ctx.beginPath();
+        ctx.moveTo(r*bx-Math.cos(an)*r*bs, r*by-Math.sin(an)*r*bs);
+        ctx.lineTo(r*bx+Math.cos(an)*r*bs, r*by+Math.sin(an)*r*bs); ctx.stroke(); }
+    });
+  }
   ctx.restore();
 }
+function aveCargando(x,y,r){
+  ctx.save(); ctx.translate(x,y);
+  ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
+  ctx.strokeStyle='#a86b1e'; ctx.lineWidth=3; ctx.stroke(); ctx.restore();
+}
+/* el que descansa en la horquilla */
+function pajaro(x,y,ang,r){
+  const id = S.equipo[S.pajarosUsados] || S.equipo[0] || 'rojo';
+  const a = getAve(id);
+  dibujaAve(a, x, y, ang, r || a.r);
+}
 
-function cerdito(x,y,ang,r,dano){
+/* ---------- cerditos y bloques ---------- */
+function cerdito(x,y,ang,r,dano,jefe){
+  if(jefe && PIEZA_IMG.pigjefe && PIEZA_IMG.pigjefe.complete && PIEZA_IMG.pigjefe.naturalWidth){
+    const im=PIEZA_IMG.pigjefe, lado=r*2.5, k=Math.min(lado/im.naturalWidth, lado/im.naturalHeight);
+    ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+    ctx.drawImage(im,-im.naturalWidth*k/2,-im.naturalHeight*k/2,im.naturalWidth*k,im.naturalHeight*k);
+    ctx.restore(); return;
+  }
   ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
-  ctx.fillStyle='#5fbe36'; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
-  // orejas
+  ctx.fillStyle= jefe? '#4aa32a' : '#5fbe36'; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
   ctx.beginPath(); ctx.moveTo(-r*.62,-r*.66); ctx.lineTo(-r*.28,-r*1.12); ctx.lineTo(-r*.08,-r*.74); ctx.closePath(); ctx.fill();
   ctx.beginPath(); ctx.moveTo( r*.62,-r*.66); ctx.lineTo( r*.28,-r*1.12); ctx.lineTo( r*.08,-r*.74); ctx.closePath(); ctx.fill();
   ctx.fillStyle='#7fd854'; ctx.beginPath(); ctx.ellipse(0,r*.12,r*.72,r*.6,0,0,7); ctx.fill();
   ctx.strokeStyle='#3d8f1c'; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.stroke();
-  // ojos
   ctx.fillStyle='#fff';
   ctx.beginPath(); ctx.arc(-r*.32,-r*.24,r*.24,0,7); ctx.fill();
   ctx.beginPath(); ctx.arc( r*.32,-r*.24,r*.24,0,7); ctx.fill();
   ctx.fillStyle='#221';
   ctx.beginPath(); ctx.arc(-r*.28,-r*.22,r*.11,0,7); ctx.fill();
   ctx.beginPath(); ctx.arc( r*.36,-r*.22,r*.11,0,7); ctx.fill();
-  // morro
   ctx.fillStyle='#4aa32a'; ctx.beginPath(); ctx.ellipse(0,r*.30,r*.34,r*.26,0,0,7); ctx.fill();
   ctx.fillStyle='#2f6e18';
   ctx.beginPath(); ctx.ellipse(-r*.13,r*.30,r*.07,r*.10,0,0,7); ctx.fill();
   ctx.beginPath(); ctx.ellipse( r*.13,r*.30,r*.07,r*.10,0,0,7); ctx.fill();
+  if(jefe){ ctx.strokeStyle='#2f6e18'; ctx.lineWidth=r*.14;
+    ctx.beginPath(); ctx.moveTo(-r*.62,-r*.52); ctx.lineTo(-r*.16,-r*.40); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( r*.62,-r*.52); ctx.lineTo( r*.16,-r*.40); ctx.stroke(); }
   if(dano>0.35){ ctx.strokeStyle='rgba(20,60,10,.6)'; ctx.lineWidth=2.5;
     ctx.beginPath(); ctx.moveTo(-r*.6,-r*.5); ctx.lineTo(-r*.2,-r*.1); ctx.lineTo(-r*.45,r*.25); ctx.stroke(); }
   ctx.restore();
 }
+
+const PIEZA_IMG = {};       // imágenes opcionales para piezas (cerdo jefe)
 
 const PINTA = {
   wood:  { cara:'#c08340', borde:'#8a5a24', linea:'#a06c30' },
@@ -491,7 +977,7 @@ const PINTA = {
   tnt:   { cara:'#d63a2f', borde:'#7d1b13', linea:'#ffd93b' },
 };
 
-function bloque(t,x,y,ang,w,h,dano){
+function bloque(t,x,y,ang,w,h,dano,congelado){
   const p = PINTA[t]; ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
   const rr = Math.min(9, w/3, h/3);
   ctx.beginPath();
@@ -518,7 +1004,6 @@ function bloque(t,x,y,ang,w,h,dano){
     ctx.strokeStyle='#3a2410'; ctx.lineWidth=4; ctx.beginPath();
     ctx.moveTo(0,-h/2); ctx.quadraticCurveTo(w*.24,-h*.78,w*.06,-h*.92); ctx.stroke();
   }
-  // grietas
   if(dano>0.28){
     ctx.strokeStyle='rgba(40,20,0,.55)'; ctx.lineWidth=2.6;
     const n = dano>0.66?3:(dano>0.45?2:1);
@@ -526,13 +1011,25 @@ function bloque(t,x,y,ang,w,h,dano){
       ctx.beginPath(); ctx.moveTo(ox-w*.1,-h/2); ctx.lineTo(ox+w*.06,-h*.1);
       ctx.lineTo(ox-w*.05,h*.12); ctx.lineTo(ox+w*.08,h/2); ctx.stroke(); }
   }
+  if(congelado){
+    ctx.fillStyle='rgba(150,225,255,.55)'; ctx.fillRect(-w/2,-h/2,w,h);
+    ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(-w*.3,h*.4); ctx.lineTo(w*.1,-h*.3); ctx.stroke();
+  }
   ctx.restore(); ctx.restore();
 }
 
-function dibujaPieza(t,x,y,ang,dano){
+function dibujaPieza(t,x,y,ang,dano,congelado){
   const d = TIPOS[t];
-  if(t==='pig') cerdito(x,y,ang,d.r,dano||0);
-  else bloque(t,x,y,ang,d.w,d.h,dano||0);
+  if(t==='pig') cerdito(x,y,ang,d.r,dano||0,false);
+  else if(t==='pigjefe') cerdito(x,y,ang,d.r,dano||0,true);
+  else bloque(t,x,y,ang,d.w,d.h,dano||0,congelado);
+}
+
+function huevoDib(x,y,ang){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
+  ctx.fillStyle='#fffdf2'; ctx.beginPath(); ctx.ellipse(0,0,11,14,0,0,7); ctx.fill();
+  ctx.strokeStyle='#d9cfae'; ctx.lineWidth=2; ctx.stroke(); ctx.restore();
 }
 
 /* ---------- partículas ---------- */
@@ -558,7 +1055,7 @@ function mueveParticulas(){
 }
 
 /* ============================================================
-   MODO CONSTRUIR
+   MODO CONSTRUIR (el editor de siempre)
    ============================================================ */
 function caja(t,x,y){
   const d=TIPOS[t];
@@ -572,8 +1069,7 @@ function sePuede(t,x,y,ignorar){
   if(c.x1 < ZONA_X || c.x2 > W-20 || c.y1 < 40 || c.y2 > SUELO+0.5) return false;
   for(let i=0;i<S.piezas.length;i++){
     if(i===ignorar) continue;
-    const p=S.piezas[i];
-    if(chocan(c, caja(p.t,p.x,p.y))) return false;
+    if(chocan(c, caja(S.piezas[i].t,S.piezas[i].x,S.piezas[i].y))) return false;
   }
   return true;
 }
@@ -595,10 +1091,13 @@ function deshacer(){
   if(!S.historial.length){ aviso('Nada que deshacer'); return; }
   S.piezas = JSON.parse(S.historial.pop()); guardaNivel(); SFX.borrar(); refrescaMarcador();
 }
-function guardaNivel(){ try{ localStorage.setItem('pajaros-locos-nivel', JSON.stringify(S.piezas)); }catch(e){} }
+function guardaNivel(){
+  if(S.nivel) return;                       // los niveles de la campaña no se tocan
+  try{ localStorage.setItem('pajaros-locos-nivel', JSON.stringify(S.piezas)); }catch(e){}
+}
 function cargaNivel(){
   try{ const s=localStorage.getItem('pajaros-locos-nivel'); if(s){ const p=JSON.parse(s); if(Array.isArray(p)) return p; } }catch(e){}
-  return JSON.parse(JSON.stringify(EJEMPLOS[0]));
+  return JSON.parse(JSON.stringify(NIVELES[0].piezas));
 }
 
 let avisoT=null;
@@ -609,28 +1108,24 @@ function aviso(txt){
 
 function pintaConstruir(){
   fondo();
-  // rejilla suave en la zona de construcción
   ctx.save(); ctx.strokeStyle='rgba(255,255,255,.30)'; ctx.lineWidth=1;
   for(let x=ZONA_X;x<W-10;x+=REJILLA*2){ ctx.beginPath(); ctx.moveTo(x,60); ctx.lineTo(x,SUELO); ctx.stroke(); }
   for(let y=60;y<SUELO;y+=REJILLA*2){ ctx.beginPath(); ctx.moveTo(ZONA_X,y); ctx.lineTo(W-10,y); ctx.stroke(); }
   ctx.restore();
-  // línea de la zona prohibida
   ctx.save(); ctx.setLineDash([16,14]); ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=5;
   ctx.beginPath(); ctx.moveTo(ZONA_X,60); ctx.lineTo(ZONA_X,SUELO); ctx.stroke(); ctx.restore();
 
   suelo(); tirachinas(false);
-  pajaro(HORQ.x, HORQ.y-4, 0, 26);
+  pajaro(HORQ.x, HORQ.y-4, 0);
 
   S.piezas.forEach((p,i)=>{ if(S.arrastrando && S.arrastrando.i===i) return; dibujaPieza(p.t,p.x,p.y,0,0); });
 
-  // pieza que se está moviendo
   if(S.arrastrando){
     const a=S.arrastrando, ok=sePuede(a.t,a.x,a.y,a.i);
     ctx.save(); ctx.globalAlpha=.85; dibujaPieza(a.t,a.x,a.y,0,0);
     ctx.strokeStyle = ok?'#3ee03e':'#ff3b3b'; ctx.lineWidth=6; ctx.setLineDash([12,8]);
     const c=caja(a.t,a.x,a.y); ctx.strokeRect(c.x1-5,c.y1-5,c.x2-c.x1+10,c.y2-c.y1+10); ctx.restore();
   }
-  // fantasma bajo el ratón
   else if(S.raton && S.herramienta!=='borrar'){
     const x=iman(S.raton.x), y=iman(S.raton.y), ok=sePuede(S.herramienta,x,y,-1);
     ctx.save(); ctx.globalAlpha= ok?.55:.30; dibujaPieza(S.herramienta,x,y,0,0);
@@ -640,7 +1135,6 @@ function pintaConstruir(){
     ctx.restore();
   }
 
-  // cartel si está vacío
   if(!S.piezas.length){
     ctx.save(); ctx.textAlign='center'; ctx.font='bold 46px Verdana';
     ctx.fillStyle='rgba(255,255,255,.95)'; ctx.strokeStyle='rgba(60,40,0,.5)'; ctx.lineWidth=8;
@@ -656,8 +1150,8 @@ function pintaConstruir(){
 function creaMundo(){
   S.motor = Engine.create();
   S.motor.gravity.y = 1.7;
-  S.cuerpos = []; S.particulas = []; S.pajaro=null;
-  S.pajarosUsados = 0; S.finPuesto=false; S.quietoDesde=0; S.calma=0;
+  S.cuerpos = []; S.particulas = []; S.aves = []; S.huevos = [];
+  S.pajarosUsados = 0; S.finPuesto=false; S.calma=0; S.aim=null; S.tirando=false;
 
   const est = { isStatic:true, friction:.9, restitution:.05 };
   Composite.add(S.motor.world, [
@@ -667,7 +1161,7 @@ function creaMundo(){
   ]);
 
   S.piezas.forEach(p=>{
-    const d=TIPOS[p.t];
+    const d=TIPOS[p.t]; if(!d) return;
     const op = { density:d.dens, friction:.62, frictionStatic:.9, restitution:.06,
                  frictionAir:.008, slop:.02 };
     const b = d.forma==='circ' ? Bodies.circle(p.x,p.y,d.r,op) : Bodies.rectangle(p.x,p.y,d.w,d.h,op);
@@ -684,13 +1178,16 @@ function creaMundo(){
       daña(a,rv,b); daña(b,rv,a);
     }
   });
-  refrescaMarcador();
+  refrescaMarcador(true);
 }
 
 function daña(cuerpo, rv, otro){
   const d = cuerpo.datos;
   if(!d || d.muerto || d.t==='bird') return;
-  const masa = otro.isStatic ? 11 : Math.min(otro.mass, 26);
+  let masa;
+  if(otro.isStatic) masa = 11;
+  else if(otro.datos && otro.datos.t==='bird') masa = Math.min(otro.mass,30) * (otro.datos.pot||1);
+  else masa = Math.min(otro.mass, 26);
   const dmg = (rv-5) * masa * 0.26;
   if(dmg <= 0) return;
   d.hp -= dmg;
@@ -700,57 +1197,170 @@ function daña(cuerpo, rv, otro){
 function destruye(cuerpo){
   const d = cuerpo.datos; if(!d || d.muerto) return; d.muerto = true;
   const x=cuerpo.position.x, y=cuerpo.position.y;
-  if(d.t==='pig'){ SFX.cerdo(); chispas(x,y,'#5fbe36',22,8); chispas(x,y,'#a8e88a',10,6); }
+  if(d.t==='huevo'){ explota(x,y,190); }
+  else if(d.t==='pig' || d.t==='pigjefe'){ SFX.cerdo(); chispas(x,y,'#5fbe36',24,8); chispas(x,y,'#a8e88a',10,6); }
   else if(d.t==='tnt'){ explota(x,y); }
   else if(d.t==='ice'){ SFX.rompe(); chispas(x,y,'#bfe9ff',20,7); }
   else if(d.t==='stone'){ SFX.rompe(); chispas(x,y,'#9b9ba6',18,6); }
   else { SFX.rompe(); chispas(x,y,'#c08340',18,6); }
   Composite.remove(S.motor.world, cuerpo);
-  const i=S.cuerpos.indexOf(cuerpo); if(i>=0) S.cuerpos.splice(i,1);
+  let i=S.cuerpos.indexOf(cuerpo); if(i>=0) S.cuerpos.splice(i,1);
+  i=S.huevos.indexOf(cuerpo); if(i>=0) S.huevos.splice(i,1);
 }
 
-function explota(x,y){
-  SFX.boom(); S.sacudida = 22;
+function explota(x,y,radio){
+  SFX.boom(); S.sacudida = Math.max(S.sacudida,22);
   chispas(x,y,'#ffd93b',34,14); chispas(x,y,'#ff7b2e',26,11); chispas(x,y,'#6b6b6b',14,8);
-  const R = 270;
-  // copia: destruye() modifica la lista
+  const R = radio||270;
   for(const b of S.cuerpos.slice()){
     if(b.datos && b.datos.muerto) continue;
     const dx=b.position.x-x, dy=b.position.y-y, dist=Math.hypot(dx,dy)||1;
     if(dist > R) continue;
     const f = (1-dist/R);
     Body.setVelocity(b,{ x:b.velocity.x + (dx/dist)*f*26, y:b.velocity.y + (dy/dist)*f*26 - f*7 });
-    if(b.datos && b.datos.t!=='bird'){ b.datos.hp -= f*90; if(b.datos.hp<=0) destruye(b); }
+    b.datos.hp -= f*90; if(b.datos.hp<=0) destruye(b);
   }
-  if(S.pajaro){
-    const dx=S.pajaro.position.x-x, dy=S.pajaro.position.y-y, dist=Math.hypot(dx,dy)||1;
+  for(const b of S.aves){
+    const dx=b.position.x-x, dy=b.position.y-y, dist=Math.hypot(dx,dy)||1;
     if(dist<R){ const f=1-dist/R;
-      Body.setVelocity(S.pajaro,{x:S.pajaro.velocity.x+(dx/dist)*f*24, y:S.pajaro.velocity.y+(dy/dist)*f*24-f*6}); }
+      Body.setVelocity(b,{x:b.velocity.x+(dx/dist)*f*24, y:b.velocity.y+(dy/dist)*f*24-f*6}); }
   }
 }
+
+/* onda expansiva (gritos, tambores, zarpazos) */
+function onda(x,y,R,fuerza,color){
+  S.sacudida = Math.max(S.sacudida,12);
+  chispas(x,y,color||'#ffffff',20,10);
+  for(const b of S.cuerpos.slice()){
+    if(b.datos && b.datos.muerto) continue;
+    const dx=b.position.x-x, dy=b.position.y-y, dist=Math.hypot(dx,dy)||1;
+    if(dist>R) continue;
+    const k=(1-dist/R);
+    Body.setVelocity(b,{x:b.velocity.x+(dx/dist)*k*fuerza, y:b.velocity.y+(dy/dist)*k*fuerza-k*5});
+    b.datos.hp -= k*30; if(b.datos.hp<=0) destruye(b);
+  }
+  SFX.golpe();
+}
+
+function burbujea(x,y){
+  chispas(x,y,'#ffd6ec',18,6);
+  for(const b of S.cuerpos){
+    if(b.datos && b.datos.muerto) continue;
+    const dist=Math.hypot(b.position.x-x, b.position.y-y);
+    if(dist>330) continue;
+    Body.setVelocity(b,{x:b.velocity.x*0.6, y:-13-(1-dist/330)*7});
+    b.frictionAir = 0.06;
+    setTimeout(()=>{ b.frictionAir = 0.008; }, 2200);
+    chispas(b.position.x,b.position.y,'#ffffff',3,3);
+  }
+  tono(500,1400,.5,'sine',.14);
+}
+
+function congelaCerca(x,y,R){
+  SFX.hielo(); chispas(x,y,'#bfe9ff',34,12);
+  for(const b of S.cuerpos){
+    const d=b.datos; if(!d || d.muerto) continue;
+    if(Math.hypot(b.position.x-x, b.position.y-y) > R) continue;
+    if(d.t==='pig' || d.t==='pigjefe'){ d.hp -= 6; if(d.hp<=0) destruye(b); continue; }
+    d.congelado = true;
+    d.max = Math.max(6, d.max*0.28);
+    d.hp = Math.min(d.hp, d.max);
+    chispas(b.position.x,b.position.y,'#e9fbff',4,3);
+  }
+}
+
+function soltaHuevo(x,y){
+  const h = Bodies.circle(x,y,13,{density:.007,friction:.4,restitution:.05,frictionAir:.006});
+  h.datos = { t:'huevo', hp:1, max:1, muerto:false };
+  Composite.add(S.motor.world,h); S.huevos.push(h);
+}
+
+/* ---------- pájaros voladores ---------- */
+function creaAve(id,x,y,vx,vy,cria){
+  const a = getAve(id);
+  const r = (a.r||26) * (cria?0.78:1);
+  const b = Bodies.circle(x,y,r,{ density:a.dens||.005, friction:.5, frictionAir:.006,
+                                  restitution:a.rebote||.42, slop:.02 });
+  b.datos = { t:'bird', ave:id, r, pot:(a.pot||1)*(cria?.7:1), poder: cria?null:a.poder,
+              poderUsado: cria?true:false, muerto:false, quieto:0 };
+  Body.setVelocity(b,{x:vx,y:vy});
+  Composite.add(S.motor.world,b); S.aves.push(b);
+  return b;
+}
+function quitaAve(b){
+  const i=S.aves.indexOf(b); if(i<0) return;
+  chispas(b.position.x,b.position.y,'#ffffff',10,5);
+  Composite.remove(S.motor.world,b); S.aves.splice(i,1);
+}
+function divide(b,n){
+  const P=b.position, V=b.velocity;
+  for(let i=1;i<=n;i++){
+    const an = (i-(n+1)/2)*0.30;
+    const c=Math.cos(an), s=Math.sin(an);
+    creaAve(b.datos.ave, P.x, P.y-6*i, V.x*c - V.y*s, V.x*s + V.y*c, true);
+  }
+  chispas(P.x,P.y,'#d3f0ff',14,6);
+}
+function estela(P,color){ chispas(P.x,P.y,color,14,7); }
 
 function lanzaPajaro(vx,vy){
-  const b = Bodies.circle(S.aim.x, S.aim.y, 26,
-    { density:.005, friction:.5, frictionAir:.006, restitution:.42, slop:.02 });
-  b.datos = { t:'bird', muerto:false };
-  Body.setVelocity(b,{x:vx,y:vy});
-  Composite.add(S.motor.world,b);
-  S.pajaro = b; S.pajarosUsados++; S.quietoDesde = 0;
+  const id = S.equipo[S.pajarosUsados] || S.equipo[0] || 'rojo';
+  creaAve(id, S.aim.x, S.aim.y, vx, vy, false);
+  S.pajarosUsados++;
   SFX.lanza(); chispas(S.aim.x,S.aim.y,'#ffffff',8,4);
-  refrescaMarcador();
+  refrescaMarcador(true);
 }
 
-function quitaPajaro(){
-  if(S.pajaro){ chispas(S.pajaro.position.x,S.pajaro.position.y,'#e0322a',10,5);
-    Composite.remove(S.motor.world,S.pajaro); S.pajaro=null; }
+function usaPoder(m){
+  let algo=false;
+  for(const b of S.aves.slice()){
+    const d=b.datos;
+    if(!d || d.poderUsado || !d.poder || d.poder==='ninguno') continue;
+    const P={x:b.position.x,y:b.position.y}, V={x:b.velocity.x,y:b.velocity.y};
+    const vel=Math.hypot(V.x,V.y)||1;
+    d.poderUsado=true; algo=true;
+    switch(d.poder){
+      case 'grito':   onda(P.x,P.y,200,16,'#ffffff'); break;
+      case 'tambor':  onda(P.x,P.y,250,19,'#ffd93b'); break;
+      case 'zarpazo': onda(P.x,P.y,260,21,'#e9d8b8'); d.pot*=1.6; break;
+      case 'acelera': Body.setVelocity(b,{x:V.x/vel*(vel+20), y:V.y/vel*(vel+20)}); d.pot*=1.8; estela(P,'#ffe14d'); break;
+      case 'turbo':   Body.setVelocity(b,{x:Math.abs(V.x/vel)*(vel+30), y:V.y/vel*(vel+30)*.5}); d.pot*=2.1; estela(P,'#ff7b2e'); break;
+      case 'tren':    Body.setVelocity(b,{x:Math.max(34,Math.abs(V.x)+18), y:-1}); d.pot*=1.9; estela(P,'#e9f4ff'); break;
+      case 'ruedas':  Body.setVelocity(b,{x:Math.max(30,Math.abs(V.x)+14), y:12}); d.pot*=2.2; estela(P,'#cfd6e2'); break;
+      case 'explota': explota(P.x,P.y,300); quitaAve(b); break;
+      case 'divide':  divide(b,2); break;
+      case 'tropa':   divide(b,3); break;
+      case 'huevo':   soltaHuevo(P.x,P.y+22); Body.setVelocity(b,{x:V.x*.25,y:-15}); break;
+      case 'vuelve':  Body.setVelocity(b,{x:-Math.abs(V.x)*1.2-8, y:-6}); d.pot*=1.3; break;
+      case 'hincha':  Body.scale(b,2.1,2.1); d.r*=2.1; d.pot*=1.7; onda(P.x,P.y,170,10,'#ffdcae'); break;
+      case 'burbujas':burbujea(P.x,P.y); break;
+      case 'picado':  Body.setVelocity(b,{x:V.x*.35,y:32}); d.pot*=1.7; break;
+      case 'congela': congelaCerca(P.x,P.y,290); quitaAve(b); break;
+      case 'salto':   Body.setVelocity(b,{x:Math.abs(V.x)+12,y:-20}); break;
+      case 'teletransporte':
+        Body.setPosition(b,{x:Math.min(W-70,P.x+280), y:Math.max(70,P.y-40)});
+        chispas(P.x,P.y,'#ffe14d',18,7); break;
+      case 'laser': {
+        const dx=(m?m.x:P.x+300)-P.x, dy=(m?m.y:P.y)-P.y, dd=Math.hypot(dx,dy)||1;
+        Body.setVelocity(b,{x:dx/dd*40,y:dy/dd*40}); d.pot*=1.5; break; }
+      case 'furia': {
+        const dx=(m?m.x:P.x+400)-P.x, dy=(m?m.y:P.y+200)-P.y, dd=Math.hypot(dx,dy)||1;
+        Body.setVelocity(b,{x:dx/dd*44,y:dy/dd*44}); d.pot*=1.8; S.sacudida=18; break; }
+    }
+    SFX.poder();
+  }
+  return algo;
 }
 
-function cerditosVivos(){ return S.cuerpos.filter(b=>b.datos && b.datos.t==='pig' && !b.datos.muerto).length; }
+function cerditosVivos(){
+  return S.cuerpos.filter(b=>b.datos && (b.datos.t==='pig'||b.datos.t==='pigjefe') && !b.datos.muerto).length;
+}
+function cerditosPuestos(){ return S.piezas.filter(p=>p.t==='pig'||p.t==='pigjefe').length; }
 
 function revisaFin(){
   if(S.finPuesto) return;
   if(cerditosVivos()===0){ S.finPuesto=true; setTimeout(()=>finPartida(true),900); return; }
-  if(S.pajarosUsados>=PAJAROS_TOTAL && !S.pajaro){
+  if(S.pajarosUsados>=S.equipo.length && !S.aves.length){
     const movido = S.cuerpos.some(b=>!b.isStatic && (Math.hypot(b.velocity.x,b.velocity.y)>0.7));
     if(!movido){ S.calma++; if(S.calma>70){ S.finPuesto=true; finPartida(false); } }
     else S.calma=0;
@@ -758,14 +1368,20 @@ function revisaFin(){
 }
 
 function finPartida(gano){
-  const restantes = Math.max(0, PAJAROS_TOTAL - S.pajarosUsados);
-  const est = gano ? Math.max(1, Math.min(3, 1 + Math.ceil(restantes/2))) : 0;
+  const restantes = Math.max(0, S.equipo.length - S.pajarosUsados);
+  const est = gano ? (restantes>=2 ? 3 : (restantes>=1 ? 2 : 1)) : 0;
   document.getElementById('finTitulo').textContent = gano ? '🏆 ¡BIEN HECHO!' : '¡Casi casi!';
   document.getElementById('finEstrellas').textContent = gano ? '⭐'.repeat(est)+'☆'.repeat(3-est) : '🐷💨';
   document.getElementById('finTexto').textContent = gano
-    ? '¡Has tirado todos los cerditos! 🎉'
+    ? (S.nivel ? '¡Nivel '+S.nivel+' superado! 🎉' : '¡Has tirado todos los cerditos! 🎉')
     : 'Se acabaron los pájaros. ¡Prueba otra vez!';
+  const bSig = document.getElementById('finSiguiente');
+  bSig.classList.toggle('oculto', !(gano && S.nivel && S.nivel < NIVELES.length));
   document.getElementById('capaFin').classList.add('on');
+  if(gano && S.nivel){
+    if((S.estrellas[S.nivel]||0) < est){ S.estrellas[S.nivel]=est; guardaEstrellas(); }
+    pintaMapa();
+  }
   gano ? SFX.gana() : SFX.falla();
   if(gano) for(let i=0;i<7;i++) setTimeout(()=>chispas(300+Math.random()*1000, 200+Math.random()*260,
       ['#ffd93b','#ff5fa2','#5fd0ff','#8ff07c'][i%4], 18, 9), i*110);
@@ -777,11 +1393,12 @@ function pintaJugar(){
     if(S.sacudida<0.5) S.sacudida=0; }
   fondo(); suelo(); tirachinas(true);
 
-  // pájaro en espera / estirando
-  if(!S.pajaro && S.pajarosUsados < PAJAROS_TOTAL && !S.finPuesto){
+  const ave = getAve(S.equipo[S.pajarosUsados] || S.equipo[0] || 'rojo');
+  const rr = ave.r || 26;
+
+  if(!S.aves.length && S.pajarosUsados < S.equipo.length && !S.finPuesto){
     const p = S.aim || { x:HORQ.x, y:HORQ.y-4 };
     if(S.tirando){
-      // línea de puntos que predice el vuelo
       const dx=HORQ.x-p.x, dy=HORQ.y-p.y, dist=Math.min(Math.hypot(dx,dy),ESTIRA_MAX)||0.001;
       const pot=dist/ESTIRA_MAX, vx=(dx/dist)*pot*VEL_MAX, vy=(dy/dist)*pot*VEL_MAX;
       let sx=p.x, sy=p.y, svx=vx, svy=vy;
@@ -793,8 +1410,7 @@ function pintaJugar(){
         if(i%5===0){ ctx.beginPath(); ctx.arc(sx,sy,Math.max(2.5,6-i*0.035),0,7); ctx.fill(); }
       }
       gomas(p.x,p.y);
-      pajaro(p.x,p.y, Math.atan2(HORQ.y-p.y,HORQ.x-p.x), 26);
-      // medidor de fuerza
+      dibujaAve(ave, p.x,p.y, Math.atan2(HORQ.y-p.y,HORQ.x-p.x), rr);
       ctx.save(); ctx.translate(SLING.x-108,SLING.y-250);
       ctx.fillStyle='rgba(0,0,0,.3)'; ctx.fillRect(0,0,26,150);
       ctx.fillStyle= pot>.75?'#ff4d4d':(pot>.4?'#ffc63b':'#8ff07c');
@@ -802,28 +1418,46 @@ function pintaJugar(){
       ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.strokeRect(0,0,26,150); ctx.restore();
     } else {
       const flot = Math.sin(S.tiempo*0.06)*3;
-      pajaro(HORQ.x, HORQ.y-4+flot, 0, 26);
-      // manita que indica "tira de mí"
+      dibujaAve(ave, HORQ.x, HORQ.y-4+flot, 0, rr);
       ctx.save(); ctx.font='40px serif'; ctx.textAlign='center';
       ctx.globalAlpha=.75+Math.sin(S.tiempo*0.1)*.25;
       ctx.fillText('👈', HORQ.x+78+Math.sin(S.tiempo*0.1)*10, HORQ.y+14); ctx.restore();
     }
   }
 
-  // cuerpos físicos
   for(const b of S.cuerpos){
     const d=b.datos, dano = 1 - Math.max(0,d.hp)/d.max;
-    dibujaPieza(d.t, b.position.x, b.position.y, b.angle, dano);
+    dibujaPieza(d.t, b.position.x, b.position.y, b.angle, dano, d.congelado);
   }
-  if(S.pajaro) pajaro(S.pajaro.position.x, S.pajaro.position.y, S.pajaro.angle, 26);
+  for(const h of S.huevos) huevoDib(h.position.x, h.position.y, h.angle);
+
+  for(const b of S.aves){
+    const d=b.datos, a=getAve(d.ave);
+    dibujaAve(a, b.position.x, b.position.y, b.angle, d.r);
+    if(!d.poderUsado && d.poder && d.poder!=='ninguno') pistaPoder(b, a);
+  }
 
   pintaParticulas();
+  ctx.restore();
+}
+
+/* globito pequeño encima del pájaro: "tócame y uso mi poder" */
+function pistaPoder(b, a){
+  const p = poderDe(a), x=b.position.x, y=b.position.y-(b.datos.r||26)-30;
+  const late = 1 + Math.sin(S.tiempo*0.18)*0.10;
+  ctx.save(); ctx.translate(x,y); ctx.scale(late,late);
+  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.beginPath(); ctx.arc(0,0,19,0,7); ctx.fill();
+  ctx.strokeStyle='#c94a00'; ctx.lineWidth=3.5; ctx.stroke();
+  ctx.font='20px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(p.icono,0,1);
   ctx.restore();
 }
 
 /* ============================================================
    BUCLE
    ============================================================ */
+function hayVentana(){ return !!document.querySelector('.capa.on'); }
+
 function bucle(){
   S.tiempo++;
   medirSiHaceFalta();
@@ -831,22 +1465,25 @@ function bucle(){
   ctx.fillStyle='#5bb3e0'; ctx.fillRect(0,0,cv.width,cv.height);
   ctx.setTransform(vista.esc,0,0,vista.esc,vista.ox,vista.oy);
 
+  const parado = hayVentana();
   if(S.modo==='jugar' && S.motor){
-    Engine.update(S.motor, 1000/60);
-    // limpia lo que se cae del mundo
-    for(const b of S.cuerpos.slice()) if(b.position.y > H+400) destruye(b);
-    if(S.pajaro){
-      const p=S.pajaro, v=Math.hypot(p.velocity.x,p.velocity.y);
-      if(p.position.y>H+300 || p.position.x>W+300 || p.position.x<-300) { quitaPajaro(); }
-      else if(v<0.55){ S.quietoDesde++; if(S.quietoDesde>80) quitaPajaro(); }
-      else S.quietoDesde=0;
+    if(!parado){
+      Engine.update(S.motor, 1000/60);
+      for(const b of S.cuerpos.slice()) if(b.position.y > H+400) destruye(b);
+      for(const h of S.huevos.slice()) if(h.position.y > H+300) destruye(h);
+      for(const b of S.aves.slice()){
+        const v=Math.hypot(b.velocity.x,b.velocity.y);
+        if(b.position.y>H+300 || b.position.x>W+300 || b.position.x<-300) quitaAve(b);
+        else if(v<0.55){ b.datos.quieto++; if(b.datos.quieto>80) quitaAve(b); }
+        else b.datos.quieto=0;
+      }
+      revisaFin();
     }
-    revisaFin();
     pintaJugar();
   } else {
     pintaConstruir();
   }
-  mueveParticulas();
+  if(!parado) mueveParticulas();
   requestAnimationFrame(bucle);
 }
 let ultimoW=0, ultimoH=0;
@@ -858,20 +1495,24 @@ function medirSiHaceFalta(){
 /* ============================================================
    ENTRADA (ratón + dedo)
    ============================================================ */
+function despierta(){
+  const a=ac(); if(a && a.state==='suspended') a.resume();
+  musicaEnciende();
+}
 cv.addEventListener('pointerdown', e=>{
   cv.setPointerCapture(e.pointerId);
-  const m = aMundo(e); if(ac() && ac().state==='suspended') ac().resume();
+  const m = aMundo(e); despierta();
 
   if(S.modo==='construir'){
     const i = piezaEn(m.x,m.y);
     if(S.herramienta==='borrar'){
       if(i>=0){ guardaHistorial(); const p=S.piezas[i];
-        chispas(p.x,p.y,'#ffffff',12,6); S.piezas.splice(i,1); guardaNivel(); SFX.borrar(); }
+        chispas(p.x,p.y,'#ffffff',12,6); S.piezas.splice(i,1); guardaNivel(); SFX.borrar(); refrescaMarcador(); }
       else aviso('Toca una pieza para borrarla');
       return;
     }
     if(i>=0){ guardaHistorial(); const p=S.piezas[i];
-      S.arrastrando={ i, t:p.t, x:p.x, y:p.y, ox:m.x-p.x, oy:m.y-p.y, orig:{x:p.x,y:p.y} }; SFX.clic(); return; }
+      S.arrastrando={ i, t:p.t, x:p.x, y:p.y, ox:m.x-p.x, oy:m.y-p.y }; SFX.clic(); return; }
     const x=iman(m.x), y=iman(m.y);
     if(sePuede(S.herramienta,x,y,-1)){
       guardaHistorial(); S.piezas.push({t:S.herramienta,x,y});
@@ -883,10 +1524,11 @@ cv.addEventListener('pointerdown', e=>{
     return;
   }
 
-  // ---- jugar: estirar el tirachinas ----
-  if(S.pajaro || S.finPuesto || S.pajarosUsados>=PAJAROS_TOTAL) return;
+  // ---- jugar ----
+  if(S.aves.length){ usaPoder(m); return; }          // tocar la pantalla = ¡poder!
+  if(S.finPuesto || S.pajarosUsados>=S.equipo.length) return;
   const d = Math.hypot(m.x-HORQ.x, m.y-HORQ.y);
-  if(d < 190){ S.tirando=true; S.aim={x:m.x,y:m.y}; limitaAim(); SFX.estira(); }
+  if(d < 260 || m.x < 560){ S.tirando=true; S.aim={x:m.x,y:m.y}; limitaAim(); SFX.estira(); }
 });
 
 cv.addEventListener('pointermove', e=>{
@@ -904,7 +1546,7 @@ function limitaAim(){
   if(S.aim.y > SUELO-30) S.aim.y = SUELO-30;
 }
 
-function suelta(e){
+function suelta(){
   if(S.modo==='construir' && S.arrastrando){
     const a=S.arrastrando;
     if(sePuede(a.t,a.x,a.y,a.i)){ S.piezas[a.i].x=a.x; S.piezas[a.i].y=a.y; guardaNivel(); SFX.poner(); }
@@ -914,7 +1556,7 @@ function suelta(e){
   if(S.modo==='jugar' && S.tirando){
     S.tirando=false;
     const dx=HORQ.x-S.aim.x, dy=HORQ.y-S.aim.y, d=Math.hypot(dx,dy);
-    if(d<26){ S.aim=null; return; }               // tirón muy flojo: no lanza
+    if(d<26){ S.aim=null; return; }
     const pot=Math.min(d,ESTIRA_MAX)/ESTIRA_MAX;
     lanzaPajaro((dx/d)*pot*VEL_MAX, (dy/d)*pot*VEL_MAX);
     S.aim=null;
@@ -926,7 +1568,7 @@ cv.addEventListener('pointerleave', ()=>{ S.raton=null; });
 window.addEventListener('contextmenu', e=>e.preventDefault());
 
 /* ============================================================
-   BOTONES
+   BARRA DE CONSTRUIR
    ============================================================ */
 const barraC = document.getElementById('barraConstruir');
 ORDEN.forEach(t=>{
@@ -948,9 +1590,9 @@ ORDEN.forEach(t=>{
   const extra=[
     ['↩️','DESHACER', deshacer],
     ['🎲','EJEMPLO', ()=>{ guardaHistorial(); S.piezas=JSON.parse(JSON.stringify(EJEMPLOS[ejemploN%EJEMPLOS.length]));
-        ejemploN++; guardaNivel(); SFX.poner(); aviso('¡Nivel de ejemplo '+((ejemploN-1)%EJEMPLOS.length+1)+'!'); }],
+        ejemploN++; guardaNivel(); SFX.poner(); refrescaMarcador(); aviso('¡Nivel de ejemplo!'); }],
     ['🗑️','VACIAR', ()=>{ if(!S.piezas.length){ aviso('Ya está vacío'); return; }
-        guardaHistorial(); S.piezas=[]; guardaNivel(); SFX.borrar(); }],
+        guardaHistorial(); S.piezas=[]; guardaNivel(); SFX.borrar(); refrescaMarcador(); }],
   ];
   extra.forEach(([em,tx,fn])=>{
     const e=document.createElement('button'); e.className='pieza';
@@ -962,52 +1604,263 @@ function marcaHerramienta(){
   barraC.querySelectorAll('.pieza').forEach(b=>b.classList.toggle('on', b.dataset.t===S.herramienta));
 }
 
+/* ============================================================
+   MODOS
+   ============================================================ */
 const bC=document.getElementById('btnConstruir'), bJ=document.getElementById('btnJugar');
-bC.onclick=()=>cambiaModo('construir');
-bJ.onclick=()=>cambiaModo('jugar');
+bC.onclick=()=>{ despierta(); cambiaModo('construir'); };
+bJ.onclick=()=>{ despierta(); cambiaModo('jugar'); };
 
 function cambiaModo(m){
-  if(m===S.modo && m==='construir') return;
   document.getElementById('capaFin').classList.remove('on');
   if(m==='jugar'){
-    if(!S.piezas.some(p=>p.t==='pig')){ aviso('🐷 ¡Pon al menos un cerdito!'); SFX.borrar();
+    if(!S.equipo.length){ aviso('🐦 ¡Elige algún pájaro!'); abrePanelAves(); return; }
+    if(!cerditosPuestos()){ aviso('🐷 ¡Pon al menos un cerdito!'); SFX.borrar();
       S.herramienta='pig'; marcaHerramienta(); return; }
     S.modo='jugar'; creaMundo();
     document.getElementById('barraConstruir').style.display='none';
     document.getElementById('barraJugar').style.display='flex';
   } else {
-    S.modo='construir'; S.motor=null; S.cuerpos=[]; S.pajaro=null; S.particulas=[]; S.aim=null; S.tirando=false;
+    if(S.nivel){ S.nivel=0; S.piezas=cargaNivel(); cargaEquipo(); }  // salir de la campaña al editor propio
+    S.modo='construir'; S.motor=null; S.cuerpos=[]; S.aves=[]; S.huevos=[]; S.particulas=[];
+    S.aim=null; S.tirando=false; S.finPuesto=false;
     document.getElementById('barraConstruir').style.display='flex';
     document.getElementById('barraJugar').style.display='none';
   }
+  document.getElementById('cajaNivel').classList.toggle('oculto', !S.nivel);
+  document.getElementById('marNivel').textContent = S.nivel || '—';
   bC.classList.toggle('on', S.modo==='construir');
   bJ.classList.toggle('on', S.modo==='jugar');
+  refrescaMarcador(true);
   SFX.clic();
 }
 
-function refrescaMarcador(){
-  const quedan = Math.max(0, PAJAROS_TOTAL - S.pajarosUsados);
-  document.getElementById('marBirds').textContent = '🐦'.repeat(quedan) || '—';
-  const cerdos = S.modo==='jugar' ? cerditosVivos() : S.piezas.filter(p=>p.t==='pig').length;
+/* ============================================================
+   MARCADOR (los pájaros que quedan, sin tapar el juego)
+   ============================================================ */
+function refrescaMarcador(forzar){
+  const box=document.getElementById('marBirds');
+  const firma = S.equipo.join(',')+'|'+S.pajarosUsados;
+  if(forzar || box.dataset.f!==firma){
+    box.dataset.f=firma; box.innerHTML='';
+    if(!S.equipo.length){ box.textContent='—'; }
+    else S.equipo.forEach((id,i)=>{
+      const c=miniAve(id,34);
+      if(i<S.pajarosUsados) c.className='gastado';
+      box.appendChild(c);
+    });
+  }
+  const cerdos = S.modo==='jugar' ? cerditosVivos() : cerditosPuestos();
   document.getElementById('marPigs').textContent = '🐷 '+cerdos;
 }
 setInterval(()=>{ if(S.modo==='jugar') refrescaMarcador(); }, 300);
 
 document.getElementById('btnOtra').onclick=()=>{ document.getElementById('capaFin').classList.remove('on'); creaMundo(); SFX.clic(); };
 document.getElementById('finOtra').onclick=()=>{ document.getElementById('capaFin').classList.remove('on'); creaMundo(); SFX.clic(); };
-document.getElementById('finConstruir').onclick=()=>{ cambiaModo('construir'); };
+document.getElementById('finMapa').onclick=()=>{ document.getElementById('capaFin').classList.remove('on'); abreMapa(); };
+document.getElementById('finSiguiente').onclick=()=>{
+  document.getElementById('capaFin').classList.remove('on');
+  if(S.nivel && S.nivel<NIVELES.length) juegaNivel(S.nivel+1); else abreMapa();
+};
 document.getElementById('btnAyuda').onclick=()=>{ document.getElementById('capaAyuda').classList.add('on'); SFX.clic(); };
 document.getElementById('ayudaOk').onclick=()=>{ document.getElementById('capaAyuda').classList.remove('on'); SFX.clic();
   try{ localStorage.setItem('pajaros-locos-visto','1'); }catch(e){} };
 document.getElementById('btnSonido').onclick=e=>{ S.mudo=!S.mudo;
-  e.currentTarget.textContent = S.mudo?'🔇':'🔊'; if(!S.mudo) SFX.clic(); };
+  e.currentTarget.textContent = S.mudo?'🔇':'🔊';
+  e.currentTarget.classList.toggle('apagado', S.mudo);
+  if(!S.mudo) SFX.clic(); guardaAjustes(); };
+document.getElementById('btnMusica').onclick=e=>{
+  MUS.on=!MUS.on; despierta();
+  e.currentTarget.classList.toggle('apagado', !MUS.on);
+  musicaVolumen(MUS.on?0.34:0); guardaAjustes(); SFX.clic();
+};
 
-/* teclado, por si acaso */
 window.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){ document.getElementById('capaAyuda').classList.remove('on');
-                        document.getElementById('capaFin').classList.remove('on'); }
+  if(e.key==='Escape'){ document.querySelectorAll('.capa.on').forEach(c=>c.classList.remove('on')); }
   if(S.modo==='construir' && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); deshacer(); }
+  if(S.modo==='jugar' && e.key===' '){ e.preventDefault(); usaPoder(null); }
 });
+
+/* ============================================================
+   LOS 30 NIVELES
+   ============================================================ */
+function guardaEstrellas(){
+  try{ localStorage.setItem('pajaros-locos-estrellas', JSON.stringify(S.estrellas)); }catch(e){}
+}
+function cargaEstrellas(){
+  try{ const j=JSON.parse(localStorage.getItem('pajaros-locos-estrellas')||'{}');
+       if(j && typeof j==='object') S.estrellas=j; }catch(e){}
+}
+function pintaMapa(){
+  const m=document.getElementById('mapa'); m.innerHTML='';
+  NIVELES.forEach((niv,i)=>{
+    const n=i+1, e=S.estrellas[n]||0;
+    const b=document.createElement('button');
+    b.className='lvl'+(e?' hecho':'')+(S.nivel===n?' actual':'');
+    b.innerHTML='<span class="n">'+n+'</span><span class="es">'+('⭐'.repeat(e)||'☆☆☆')+'</span>';
+    b.onclick=()=>{ document.getElementById('capaNiveles').classList.remove('on'); juegaNivel(n); };
+    m.appendChild(b);
+  });
+}
+function abreMapa(){ pintaMapa(); document.getElementById('capaNiveles').classList.add('on'); SFX.clic(); }
+function juegaNivel(n){
+  const niv = NIVELES[n-1]; if(!niv) return;
+  S.nivel = n;
+  S.piezas = JSON.parse(JSON.stringify(niv.piezas));
+  S.equipo = niv.equipo.filter(id=>AVES[id]||EXTRA[id]).slice(0,MAX_EQUIPO);
+  if(!S.equipo.length) S.equipo=['rojo','rojo','rojo'];
+  S.historial=[];
+  S.modo='construir';                       // fuerza el rearranque limpio
+  cambiaModo('jugar');
+  aviso('🗺️ Nivel '+n);
+}
+document.getElementById('btnNiveles').onclick=()=>{ despierta(); abreMapa(); };
+document.getElementById('nivelesCerrar').onclick=()=>{ document.getElementById('capaNiveles').classList.remove('on'); SFX.clic(); };
+
+/* ============================================================
+   ELEGIR PÁJAROS
+   ============================================================ */
+function miniAve(id, lado){
+  const c=document.createElement('canvas');
+  c.width=lado*2; c.height=lado*2;
+  pintaAveEn(c,id);
+  return c;
+}
+function pintaAveEn(c,id){
+  const a=getAve(id), g=c.getContext('2d'), prev=ctx;
+  ctx = g;
+  g.clearRect(0,0,c.width,c.height);
+  const r = a.r||26, k = (c.width*0.94)/(r*3.6);
+  g.save(); g.translate(c.width/2 + r*k*0.28, c.height/2); g.scale(k,k);
+  try{ dibujaAve(a,0,0,0,r); }catch(e){}
+  g.restore();
+  ctx = prev;
+  if(a.img && !a.img.complete){
+    a.img.addEventListener('load', ()=>{ try{ pintaAveEn(c,id); }catch(e){} }, {once:true});
+  }
+}
+function guardaEquipo(){
+  try{ localStorage.setItem('pajaros-locos-equipo', JSON.stringify(S.equipo)); }catch(e){}
+}
+function cargaEquipo(){
+  try{ const j=JSON.parse(localStorage.getItem('pajaros-locos-equipo')||'null');
+       if(Array.isArray(j) && j.length) S.equipo=j.slice(0,MAX_EQUIPO); }catch(e){}
+}
+function pintaEquipo(){
+  const e=document.getElementById('equipo'); e.innerHTML='';
+  for(let i=0;i<MAX_EQUIPO;i++){
+    const b=document.createElement('button');
+    const id=S.equipo[i];
+    b.className='hueco'+(id?' lleno':'');
+    if(id){
+      b.appendChild(miniAve(id,60));
+      b.title = getAve(id).nombre;
+      b.onclick=()=>{ S.equipo.splice(i,1); guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar(); };
+    } else {
+      b.textContent='+';
+      b.onclick=()=>aviso('Toca un pájaro de abajo 👇');
+    }
+    e.appendChild(b);
+  }
+}
+function añadeAve(id){
+  if(S.equipo.length>=MAX_EQUIPO){ aviso('¡El tirachinas está lleno!'); SFX.borrar(); return; }
+  S.equipo.push(id); guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+}
+function pintaListaAves(){
+  const L=document.getElementById('listaAves'); if(!L) return;
+  L.innerHTML='';
+  let serieAhora='';
+  todosLosIds().forEach(id=>{
+    const a=getAve(id), p=poderDe(a);
+    const serie=a.serie||'Otros';
+    if(serie!==serieAhora){
+      serieAhora=serie;
+      const t=document.createElement('div'); t.className='tituserie'; t.textContent=serie;
+      L.appendChild(t);
+    }
+    const c=document.createElement('button');
+    c.className='carta'+(S.equipo.indexOf(id)>=0?' dentro':'');
+    c.title=a.nombre+': '+p.que;
+    c.appendChild(miniAve(id,62));
+    const n=document.createElement('span'); n.className='nm'; n.textContent=a.nombre; c.appendChild(n);
+    const q=document.createElement('span'); q.className='pw'; q.textContent=p.icono+' '+p.nombre; c.appendChild(q);
+    c.onclick=()=>añadeAve(id);
+    L.appendChild(c);
+  });
+}
+function abrePanelAves(){
+  pintaEquipo(); pintaListaAves();
+  document.getElementById('capaAves').classList.add('on'); SFX.clic();
+}
+document.getElementById('btnAves').onclick=()=>{ despierta(); S.equipoAntes=S.equipo.join(','); abrePanelAves(); };
+document.getElementById('avesListo').onclick=()=>{
+  document.getElementById('capaAves').classList.remove('on'); SFX.clic();
+  if(!S.equipo.length){ S.equipo=['rojo','rayo','bomba']; guardaEquipo(); }
+  refrescaMarcador(true);
+  if(S.modo==='jugar' && S.equipoAntes!==S.equipo.join(',')){ creaMundo(); aviso('🐦 ¡Equipo nuevo!'); }
+};
+document.getElementById('avesAzar').onclick=()=>{
+  const ids=todosLosIds(); S.equipo=[];
+  const n=Math.min(5,ids.length);
+  for(let i=0;i<n;i++) S.equipo.push(ids[Math.floor(Math.random()*ids.length)]);
+  guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+};
+document.getElementById('avesVariado').onclick=()=>{
+  const ids=todosLosIds(); S.equipo=[];
+  const salto=Math.max(1,Math.floor(ids.length/MAX_EQUIPO));
+  for(let i=0;i<ids.length && S.equipo.length<MAX_EQUIPO;i+=salto) S.equipo.push(ids[i]);
+  guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+};
+document.getElementById('avesVacia').onclick=()=>{
+  S.equipo=[]; guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar();
+};
+
+/* ---------- invitados: los pájaros recortados que hay en pajaros/ ---------- */
+function cargaInvitados(){
+  fetch('pajaros/pajaros.json',{cache:'no-store'})
+    .then(r=> r.ok ? r.json() : null)
+    .then(j=>{
+      if(!j || !Array.isArray(j.pajaros)) return;
+      j.pajaros.forEach(p=>{
+        if(!p || !p.id || !p.archivo) return;
+        const im=new Image(); im.src='pajaros/'+p.archivo;
+        if(p.cerdo){ PIEZA_IMG.pigjefe=im; return; }
+        EXTRA['inv_'+p.id] = { nombre:p.nombre||p.id, serie:p.serie||'Invitados', img:im,
+          r:p.r||30, dens:p.dens||.005, pot:p.pot||1, poder:p.poder||'grito', voltea:!!p.voltea };
+      });
+      pintaListaAves(); refrescaMarcador(true);
+    })
+    .catch(()=>{});
+}
+
+/* ---------- los dibujos del niño también son pájaros ---------- */
+function regDibujos(){
+  Object.keys(EXTRA).forEach(k=>{ if(k.indexOf('dib')===0) delete EXTRA[k]; });
+  MI.lista.forEach((url,i)=>{
+    const im=new Image(); im.src=url;
+    EXTRA['dib'+i] = { nombre:'Mi dibujo '+(i+1), serie:'Míos', img:im,
+                       r:27, dens:.005, pot:1, poder:'grito' };
+  });
+  S.equipo = S.equipo.filter(id=>AVES[id]||EXTRA[id]);
+  if(!S.equipo.length) S.equipo=['rojo','rayo','bomba'];
+  pintaListaAves();
+}
+
+function guardaAjustes(){
+  try{ localStorage.setItem('pajaros-locos-ajustes', JSON.stringify({mudo:S.mudo, musica:MUS.on})); }catch(e){}
+}
+function cargaAjustes(){
+  try{
+    const j=JSON.parse(localStorage.getItem('pajaros-locos-ajustes')||'{}');
+    if(j && typeof j==='object'){
+      S.mudo=!!j.mudo; MUS.on = j.musica!==false;
+    }
+  }catch(e){}
+  const bs=document.getElementById('btnSonido'), bm=document.getElementById('btnMusica');
+  bs.textContent = S.mudo?'🔇':'🔊'; bs.classList.toggle('apagado', S.mudo);
+  bm.classList.toggle('apagado', !MUS.on);
+}
 
 /* ============================================================
    TALLER: FOTO DE UN DIBUJO → PÁJARO
@@ -1027,7 +1880,6 @@ function extraeDibujo(src, umbral){
   g.drawImage(src, 0, 0, w, h);
   const dat = g.getImageData(0,0,w,h), p = dat.data;
 
-  // color del papel = media del marco de la foto
   let br=0, bg=0, bb=0, n=0;
   for(let j=0;j<h;j++) for(let i=0;i<w;i++){
     if(i>3 && j>3 && i<w-4 && j<h-4) continue;
@@ -1037,7 +1889,6 @@ function extraeDibujo(src, umbral){
   const u2 = umbral*umbral;
   const esFondo = o => { const a=p[o]-br, b=p[o+1]-bg, d=p[o+2]-bb; return a*a+b*b+d*d < u2; };
 
-  // inundación desde los cuatro bordes
   const visto = new Uint8Array(w*h), cola = new Int32Array(w*h);
   let ini=0, fin=0;
   const mete = id => { if(!visto[id] && esFondo(id*4)){ visto[id]=1; cola[fin++]=id; } };
@@ -1051,15 +1902,14 @@ function extraeDibujo(src, umbral){
     if(j<h-1) mete(id+w);
   }
 
-  // transparencia + caja del dibujo
   let x1=w, y1=h, x2=-1, y2=-1, vivos=0;
   for(let j=0;j<h;j++) for(let i=0;i<w;i++){
     const id=j*w+i;
     if(visto[id]) p[id*4+3]=0;
     else { vivos++; if(i<x1)x1=i; if(i>x2)x2=i; if(j<y1)y1=j; if(j>y2)y2=j; }
   }
-  if(x2<0 || vivos < 40) return null;                 // no se ve nada
-  if(vivos > w*h*0.97) { x1=0; y1=0; x2=w-1; y2=h-1; } // no se quitó fondo: se usa entera
+  if(x2<0 || vivos < 40) return null;
+  if(vivos > w*h*0.97) { x1=0; y1=0; x2=w-1; y2=h-1; }
   g.putImageData(dat,0,0);
 
   const pad=2;
@@ -1067,7 +1917,6 @@ function extraeDibujo(src, umbral){
   x2=Math.min(w-1,x2+pad); y2=Math.min(h-1,y2+pad);
   const cw=x2-x1+1, ch=y2-y1+1;
 
-  // escala a un tamaño cómodo y añade contorno de pegatina
   const DEST = 190, G = 5;
   const s = Math.min(DEST/cw, DEST/ch, 2.2);
   const fw = Math.max(8,Math.round(cw*s)), fh = Math.max(8,Math.round(ch*s));
@@ -1121,48 +1970,40 @@ function leeArchivo(file){
 }
 
 function guardaMisPajaros(){
-  try{
-    localStorage.setItem('pajaros-locos-dibujos', JSON.stringify(MI.lista));
-    localStorage.setItem('pajaros-locos-elegido', String(MI.sel));
-  }catch(e){ aviso('No caben más pájaros guardados'); }
+  try{ localStorage.setItem('pajaros-locos-dibujos', JSON.stringify(MI.lista)); }
+  catch(e){ aviso('No caben más pájaros guardados'); }
 }
 function cargaMisPajaros(){
   try{
     const l = JSON.parse(localStorage.getItem('pajaros-locos-dibujos')||'[]');
     if(Array.isArray(l)) MI.lista = l.filter(s=>typeof s==='string');
-    const s = parseInt(localStorage.getItem('pajaros-locos-elegido'),10);
-    MI.sel = (!isNaN(s) && s>=0 && s<MI.lista.length) ? s : -1;
   }catch(e){}
-  aplicaPajaro();
-}
-function aplicaPajaro(){
-  if(MI.sel<0 || !MI.lista[MI.sel]){ MI.img=null; return; }
-  const im = new Image(); im.onload = ()=>{ MI.img = im; }; im.src = MI.lista[MI.sel];
+  regDibujos();
 }
 
 function pintaGaleria(){
   const gal = document.getElementById('galeria');
   gal.innerHTML='';
-  // pájaro clásico
-  const clasico = document.createElement('button');
-  clasico.className = 'tarjeta' + (MI.sel<0?' on':'');
-  clasico.innerHTML = '<span style="font-size:38px">🐦</span>';
-  clasico.onclick = ()=>{ MI.sel=-1; MI.img=null; guardaMisPajaros(); pintaGaleria(); SFX.clic(); };
-  gal.appendChild(clasico);
-
+  if(!MI.lista.length){
+    const v=document.createElement('p'); v.className='consejo'; v.textContent='Todavía no hay ninguno 🖍️';
+    gal.appendChild(v); return;
+  }
   MI.lista.forEach((url,i)=>{
+    const id='dib'+i;
     const t = document.createElement('button');
-    t.className = 'tarjeta' + (MI.sel===i?' on':'');
+    t.className = 'tarjeta' + (S.equipo.indexOf(id)>=0?' on':'');
     const im = document.createElement('img'); im.src=url; im.alt='mi pájaro '+(i+1);
     t.appendChild(im);
-    t.onclick = ()=>{ MI.sel=i; aplicaPajaro(); guardaMisPajaros(); pintaGaleria(); SFX.poner(); };
+    t.onclick = ()=>{
+      if(S.equipo.indexOf(id)>=0){ aviso('Ya está en el tirachinas 🐦'); return; }
+      añadeAve(id); pintaGaleria();
+    };
     const x = document.createElement('button');
     x.className='x'; x.textContent='✕'; x.title='Borrar';
     x.onclick = ev=>{
       ev.stopPropagation();
       MI.lista.splice(i,1);
-      if(MI.sel===i){ MI.sel=-1; MI.img=null; } else if(MI.sel>i){ MI.sel--; }
-      guardaMisPajaros(); pintaGaleria(); SFX.borrar();
+      guardaMisPajaros(); regDibujos(); pintaGaleria(); pintaEquipo(); refrescaMarcador(true); SFX.borrar();
     };
     t.appendChild(x);
     gal.appendChild(t);
@@ -1170,6 +2011,7 @@ function pintaGaleria(){
 }
 
 document.getElementById('btnTaller').onclick = ()=>{
+  despierta();
   elPaso1.classList.remove('oculto'); elPaso2.classList.add('oculto');
   MI.fuente=null; MI.temp=null;
   pintaGaleria();
@@ -1191,9 +2033,11 @@ document.getElementById('btnGuardarPajaro').onclick = ()=>{
   if(!MI.temp) return;
   MI.lista.push(MI.temp);
   if(MI.lista.length>8) MI.lista.shift();
-  MI.sel = MI.lista.length-1;
   MI.temp=null; MI.fuente=null;
-  aplicaPajaro(); guardaMisPajaros(); pintaGaleria();
+  guardaMisPajaros(); regDibujos();
+  const id='dib'+(MI.lista.length-1);
+  if(S.equipo.length<MAX_EQUIPO && S.equipo.indexOf(id)<0){ S.equipo.push(id); guardaEquipo(); }
+  pintaGaleria(); pintaEquipo(); refrescaMarcador(true);
   elPaso2.classList.add('oculto'); elPaso1.classList.remove('oculto');
   SFX.gana(); aviso('🐦 ¡Tu pájaro ya vuela!');
 };
@@ -1201,13 +2045,20 @@ document.getElementById('btnGuardarPajaro').onclick = ()=>{
 /* ============================================================
    ARRANQUE
    ============================================================ */
-/* el enlace al APK solo tiene sentido en la web, no dentro de la propia app */
 try{ if(location.hostname.indexOf('github.io')>=0) document.getElementById('lineaApk').classList.remove('oculto'); }catch(e){}
 
+cargaAjustes();
+cargaEstrellas();
+cargaEquipo();
+cargaMisPajaros();
+cargaInvitados();
 S.piezas = cargaNivel();
-medir(); marcaHerramienta(); refrescaMarcador(); cargaMisPajaros();
+medir(); marcaHerramienta(); refrescaMarcador(true); pintaEquipo(); pintaListaAves(); pintaMapa();
 try{ if(!localStorage.getItem('pajaros-locos-visto')) document.getElementById('capaAyuda').classList.add('on'); }
 catch(e){ document.getElementById('capaAyuda').classList.add('on'); }
+/* la música necesita que el niño toque algo antes (lo piden los navegadores) */
+['pointerdown','keydown','touchstart'].forEach(ev=>
+  window.addEventListener(ev, ()=>{ despierta(); }, {once:true}));
 requestAnimationFrame(bucle);
 </script>
 </body>

@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "pajaros": [
+    {
+      "id": "tomas",
+      "nombre": "Tomás",
+      "serie": "Invitados",
+      "archivo": "tomas.png",
+      "poder": "tren",
+      "r": 30,
+      "dens": 0.0062,
+      "pot": 1.4,
+      "cerdo": false,
+      "voltea": true,
+      "ancho": 419,
+      "alto": 420
+    },
+    {
+      "id": "rayoveloz",
+      "nombre": "Rayo Veloz",
+      "serie": "Invitados",
+      "archivo": "rayoveloz.png",
+      "poder": "turbo",
+      "r": 29,
+      "dens": 0.0058,
+      "pot": 1.35,
+      "cerdo": false,
+      "voltea": true,
+      "ancho": 420,
+      "alto": 409
+    },
+    {
+      "id": "lemi",
+      "nombre": "Lemi",
+      "serie": "Invitados",
+      "archivo": "lemi.png",
+      "poder": "tropa",
+      "r": 31,
+      "dens": 0.006,
+      "pot": 1.2,
+      "cerdo": false,
+      "ancho": 418,
+      "alto": 420
+    },
+    {
+      "id": "grizzy",
+      "nombre": "Grizzy",
+      "serie": "Invitados",
+      "archivo": "grizzy.png",
+      "poder": "zarpazo",
+      "r": 34,
+      "dens": 0.0072,
+      "pot": 1.6,
+      "cerdo": false,
+      "ancho": 420,
+      "alto": 413
+    },
+    {
+      "id": "camion",
+      "nombre": "Camión Rojo",
+      "serie": "Invitados",
+      "archivo": "camion.png",
+      "poder": "ruedas",
+      "r": 36,
+      "dens": 0.0085,
+      "pot": 2,
+      "cerdo": false,
+      "ancho": 420,
+      "alto": 385
+    },
+    {
+      "id": "cerdicoche",
+      "nombre": "Cerdi-Coche",
+      "serie": "Invitados",
+      "archivo": "cerdicoche.png",
+      "poder": "ruedas",
+      "r": 36,
+      "dens": 0.008,
+      "pot": 1.8,
+      "cerdo": true,
+      "ancho": 420,
+      "alto": 327
+    }
+  ]
+}

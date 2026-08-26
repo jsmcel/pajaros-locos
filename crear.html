@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fábrica de pájaros — Pájaros Locos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Comic Sans MS","Baloo 2",Verdana,system-ui,sans-serif;
+    background:linear-gradient(#5fb8ea,#a8ddf5 60%,#dff3fb);
+    color:#3a2c1a;min-height:100%;padding:18px;
+  }
+  .caja{max-width:900px;margin:0 auto}
+  header{
+    background:linear-gradient(#ffd85e,#ffb524);border:5px solid #c9800f;border-radius:22px;
+    padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    box-shadow:0 6px 0 #c9800f;
+  }
+  h1{font-size:clamp(20px,3.4vw,32px);color:#7a3d00;text-shadow:2px 2px 0 #fff5cc}
+  .spacer{flex:1}
+  a.boton,button{
+    font-family:inherit;font-weight:900;cursor:pointer;border:5px solid #2e7a20;border-radius:18px;
+    background:#6fd45c;color:#0d3d06;padding:10px 18px;box-shadow:0 5px 0 #2e7a20;
+    font-size:clamp(14px,2vw,18px);text-decoration:none;display:inline-block;
+  }
+  a.boton.azul,button.azul{background:#68c8f5;border-color:#1b6d97;color:#04324a;box-shadow:0 5px 0 #1b6d97}
+  button:active,a.boton:active{transform:translateY(3px);box-shadow:0 2px 0 #2e7a20}
+  button[disabled]{filter:grayscale(.7);opacity:.7;cursor:progress}
+  section{
+    background:linear-gradient(#fff8e2,#ffe9b8);border:6px solid #a86b1e;border-radius:24px;
+    padding:16px;margin-top:16px;box-shadow:0 8px 0 #7d4c12;
+  }
+  h2{font-size:clamp(17px,2.6vw,24px);color:#c94a00;margin-bottom:8px}
+  p,li{font-size:clamp(13px,1.9vw,17px);font-weight:700;color:#5a3a12;line-height:1.5}
+  label{display:block;font-weight:900;color:#6b3d06;margin:10px 0 4px;font-size:15px}
+  input,select,textarea{
+    font-family:inherit;font-size:16px;width:100%;padding:11px 13px;border:4px solid #a86b1e;
+    border-radius:14px;background:#fffdf5;color:#3a2c1a;font-weight:700;
+  }
+  textarea{min-height:78px;resize:vertical}
+  .fila{display:flex;gap:12px;flex-wrap:wrap}
+  .fila>div{flex:1 1 190px}
+  .acciones{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  #log{
+    margin-top:12px;background:#2b1c0c;color:#ffe9b8;border-radius:14px;padding:12px;
+    font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap;max-height:220px;overflow:auto;
+    display:none;
+  }
+  #log.on{display:block}
+  .galeria{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+  .ave{
+    width:150px;background:#fffdf5;border:5px solid #a86b1e;border-radius:18px;padding:8px;
+    text-align:center;box-shadow:0 5px 0 #7d4c12;position:relative;
+  }
+  .ave img{
+    width:100%;height:110px;object-fit:contain;
+    background:
+      linear-gradient(45deg,#e6e6e6 25%,transparent 25%,transparent 75%,#e6e6e6 75%),
+      linear-gradient(45deg,#e6e6e6 25%,#fff 25%,#fff 75%,#e6e6e6 75%);
+    background-size:18px 18px;background-position:0 0,9px 9px;border-radius:12px;
+  }
+  .ave b{display:block;margin-top:6px;color:#6b3d06;font-size:14px}
+  .ave span{font-size:12px;color:#8a5a2b;font-weight:700}
+  .ave .x{
+    position:absolute;top:-10px;right:-10px;width:30px;height:30px;border-radius:50%;
+    background:#ff5252;color:#fff;border:3px solid #fff;font-size:15px;padding:0;
+    box-shadow:0 3px 0 #b32020;
+  }
+  .apagado{background:#ffdada;border-color:#c33;color:#7d1b13}
+  .chip{display:inline-block;background:#ffe9b8;border:3px solid #a86b1e;border-radius:12px;
+        padding:3px 9px;font-size:13px;font-weight:900;color:#6b3d06;margin:2px}
+</style>
+</head>
+<body>
+<div class="caja">
+
+  <header>
+    <h1>🎨 Fábrica de pájaros</h1>
+    <div class="spacer"></div>
+    <a class="boton azul" href="index.html">▶️ Ir al juego</a>
+  </header>
+
+  <section id="avisoServidor" class="apagado" style="display:none">
+    <h2>⚠️ Falta encender el motor</h2>
+    <p>Esta página crea pájaros con IA y para eso necesita el servidor de casa. Abre una terminal en la carpeta del juego y escribe:</p>
+    <p><span class="chip">node herramientas/servidor.mjs</span></p>
+    <p>Luego entra por <span class="chip">http://127.0.0.1:8123/crear.html</span>. Necesitas tener <b>codex</b> instalado y con sesión iniciada (es quien habla con ChatGPT).</p>
+  </section>
+
+  <section>
+    <h2>✨ Inventa un pájaro</h2>
+    <p>Escribe cómo es y ChatGPT lo dibujará <b>sin fondo</b>. Cuando esté, aparece solo en el juego, en el grupo <b>«Hechos con IA»</b>.</p>
+    <label for="desc">¿Cómo es tu pájaro?</label>
+    <textarea id="desc" placeholder="Un pájaro pirata azul con parche en el ojo y sombrero de capitán"></textarea>
+    <div class="fila">
+      <div>
+        <label for="nombre">Cómo se llama</label>
+        <input id="nombre" maxlength="18" placeholder="Capitán Pico">
+      </div>
+      <div>
+        <label for="poder">Su poder</label>
+        <select id="poder">
+          <option value="">🎲 Sorpresa</option>
+          <option value="grito">💥 Grito: empuja todo</option>
+          <option value="acelera">⚡ Acelerón</option>
+          <option value="explota">💣 Bombazo</option>
+          <option value="divide">3️⃣ Se hace tres</option>
+          <option value="huevo">🥚 Suelta un huevo</option>
+          <option value="vuelve">🪃 Bumerán</option>
+          <option value="hincha">🎈 Se hincha</option>
+          <option value="burbujas">🫧 Burbujas</option>
+          <option value="picado">🌀 Picado</option>
+          <option value="congela">❄️ Congela</option>
+          <option value="laser">🎯 Va donde tocas</option>
+          <option value="furia">🦅 Furia</option>
+          <option value="salto">🦘 Supersalto</option>
+          <option value="teletransporte">✨ Teletransporte</option>
+          <option value="tambor">🥁 Tamborazo</option>
+          <option value="tren">🚂 Vapor</option>
+          <option value="turbo">🏎️ Turbo</option>
+          <option value="tropa">👥 Llama a su tropa</option>
+          <option value="zarpazo">🐻 Zarpazo</option>
+          <option value="ruedas">🛞 Ruedas</option>
+        </select>
+      </div>
+    </div>
+    <div class="acciones">
+      <button id="btnCrear">🎨 ¡CREAR PÁJARO!</button>
+      <span id="estado"></span>
+    </div>
+    <div id="log"></div>
+  </section>
+
+  <section>
+    <h2>🐦 Pájaros hechos con IA</h2>
+    <p id="vacio">Todavía no hay ninguno. ¡Inventa el primero! 👆</p>
+    <div class="galeria" id="galeria"></div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const log = $("#log");
+
+function apunta(txt){
+  log.classList.add('on');
+  log.textContent += txt + "\n";
+  log.scrollTop = log.scrollHeight;
+}
+
+async function hayServidor(){
+  try{
+    const r = await fetch('api/pajaros', {cache:'no-store'});
+    return r.ok && (r.headers.get('content-type')||'').includes('json');
+  }catch(e){ return false; }
+}
+
+async function pinta(){
+  let j = {pajaros:[]};
+  try{
+    const r = await fetch('api/pajaros', {cache:'no-store'});
+    if(r.ok) j = await r.json();
+  }catch(e){
+    try{ const r2 = await fetch('pajaros/pajaros.json',{cache:'no-store'}); if(r2.ok) j = await r2.json(); }catch(e2){}
+  }
+  const g = $("#galeria"); g.innerHTML='';
+  const lista = (j.pajaros||[]);
+  $("#vacio").style.display = lista.length ? 'none' : 'block';
+  lista.forEach(p=>{
+    const d = document.createElement('div'); d.className='ave';
+    d.innerHTML = '<img src="pajaros/'+p.archivo+'?v='+Date.now()+'" alt="'+(p.nombre||p.id)+'">'
+                + '<b>'+(p.nombre||p.id)+'</b>'
+                + '<span>'+(p.serie||'')+' · '+(p.poder||'')+'</span>';
+    const x = document.createElement('button');
+    x.className='x'; x.textContent='✕'; x.title='Borrar';
+    x.onclick = async ()=>{
+      if(!confirm('¿Borro a '+(p.nombre||p.id)+'?')) return;
+      await fetch('api/borrar',{method:'POST',headers:{'content-type':'application/json'},
+                                body:JSON.stringify({id:p.id})});
+      pinta();
+    };
+    d.appendChild(x);
+    g.appendChild(d);
+  });
+}
+
+$("#btnCrear").onclick = async ()=>{
+  const desc = $("#desc").value.trim();
+  if(!desc){ alert('Escribe cómo es el pájaro 🙂'); return; }
+  const b = $("#btnCrear");
+  b.disabled = true;
+  $("#estado").textContent = '⏳ Dibujando… (tarda un par de minutos)';
+  log.classList.add('on'); log.textContent = '';
+  apunta('🎨 Encargo: ' + desc);
+  try{
+    const r = await fetch('api/crear', {
+      method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({ desc, nombre: $("#nombre").value.trim(), poder: $("#poder").value })
+    });
+    const j = await r.json();
+    if(j.ok){
+      apunta('✅ ¡Listo! ' + j.pajaro.nombre + ' (poder: ' + j.pajaro.poder + ')');
+      apunta('Ya está en el juego, en el grupo "Hechos con IA".');
+      $("#estado").textContent = '✅ ¡Hecho!';
+      $("#desc").value=''; $("#nombre").value='';
+      pinta();
+    } else {
+      apunta('❌ ' + (j.error||'no ha salido'));
+      $("#estado").textContent = '❌ No ha salido';
+    }
+  }catch(e){
+    apunta('❌ No he podido hablar con el servidor: ' + e.message);
+    $("#estado").textContent = '❌ Sin servidor';
+  }
+  b.disabled = false;
+};
+
+hayServidor().then(ok=>{ if(!ok) $("#avisoServidor").style.display='block'; });
+pinta();
+</script>
+</body>
+</html>

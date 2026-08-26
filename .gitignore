@@ -1,0 +1,16 @@
+# pasos intermedios de la fábrica de pájaros (se pueden volver a generar)
+imagenes/blanco/
+imagenes/ia/
+
+# cosas de Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/index.html
+android/app/src/main/assets/matter.min.js
+android/app/src/main/assets/pajaros/
+
+# basura del sistema
+Thumbs.db
+.DS_Store
