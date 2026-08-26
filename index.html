@@ -122,6 +122,10 @@
   }
   .hueco.lleno{border-style:solid;border-color:#1f7d0d;background:#eaffd9;box-shadow:0 4px 0 #1f7d0d}
   .hueco canvas{width:86%;height:86%;pointer-events:none}
+  .hueco .pod{
+    position:absolute;bottom:-8px;right:-8px;background:#ffe14d;border:3px solid #c9a400;
+    border-radius:50%;width:26px;height:26px;display:grid;place-items:center;font-size:13px;
+  }
   .listaAves{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0}
   .carta{
     width:clamp(78px,10vw,100px);background:#fff6dd;border:5px solid #a86b1e;border-radius:18px;
@@ -131,10 +135,36 @@
   .carta:active{transform:translateY(3px);box-shadow:0 1px 0 #7d4c12}
   .carta canvas{width:clamp(48px,6vw,62px);height:clamp(48px,6vw,62px);pointer-events:none}
   .carta .nm{font-size:clamp(10px,1.2vw,13px);font-weight:900;color:#6b3d06;line-height:1.15}
-  .carta .pw{font-size:clamp(9px,1.1vw,12px);font-weight:700;color:#8a5a2b;line-height:1.15}
+  .carta .pw{
+    font-size:clamp(9px,1.1vw,12px);font-weight:900;color:#6b3d06;line-height:1.2;
+    background:#ffe14d;border:2px solid #c9a400;border-radius:10px;padding:1px 5px;margin-top:2px;
+    display:block;max-width:96%;
+  }
   .carta.dentro{border-color:#1f7d0d;box-shadow:0 4px 0 #1f7d0d,0 0 0 4px #fff86b}
   .tituserie{width:100%;font-size:clamp(11px,1.4vw,15px);font-weight:900;color:#a86b1e;
              text-align:left;margin:6px 0 0;border-top:3px dashed #d9b273;padding-top:4px}
+
+  /* ---------- álbum: los pájaros en grande ---------- */
+  #albLienzo{
+    width:clamp(140px,30vh,320px);height:clamp(140px,30vh,320px);display:block;margin:2px auto;
+    background:radial-gradient(circle at 50% 45%, #ffffff 0%, #d8f0ff 62%, #b9e2f7 100%);
+    border:6px solid #a86b1e;border-radius:26px;box-shadow:inset 0 6px 20px rgba(0,0,0,.15);
+  }
+  #albNombre{margin-bottom:0}
+  .albserie{font-size:clamp(12px,1.7vw,16px);color:#a86b1e;font-weight:900;margin:0}
+  .albpoder{
+    background:#fff6dd;border:4px solid #a86b1e;border-radius:16px;padding:6px 12px;
+    display:inline-block;margin:6px auto 2px;box-shadow:0 4px 0 #7d4c12;
+    font-size:clamp(13px,2vw,19px);font-weight:900;color:#6b3d06;max-width:96%;
+  }
+  .flecha{
+    font-size:clamp(20px,3vw,28px);background:#ffe9b8;border:5px solid #a86b1e;border-radius:18px;
+    width:clamp(52px,7vw,70px);height:clamp(46px,6vw,58px);box-shadow:0 5px 0 #7d4c12;line-height:1;
+  }
+  #capaAlbum .panel{padding:10px clamp(10px,2vw,22px) 12px}
+  #capaAlbum h2{font-size:clamp(19px,3.6vw,32px)}
+  #capaAlbum .grande{padding:9px 16px;margin:4px}
+  .flecha:active{transform:translateY(3px);box-shadow:0 2px 0 #7d4c12}
 
   /* ---------- mapa de niveles ---------- */
   .mapa{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:8px 0}
@@ -246,7 +276,7 @@
       <div class="panel">
         <h2>¿Cómo se juega?</h2>
         <ul class="pasos">
-          <li><b>1️⃣ 🗺️</b> En <b>NIVELES</b> tienes 30 niveles, cada uno más difícil.</li>
+          <li><b>1️⃣ 🗺️</b> En <b>NIVELES</b> tienes 60 niveles, cada uno más difícil.</li>
           <li><b>2️⃣ 🔨</b> En <b>CONSTRUIR</b> haces tu propio nivel: toca una pieza y toca el cielo.</li>
           <li><b>3️⃣ 🚀</b> Estira el pájaro hacia atrás y suéltalo.</li>
           <li><b>4️⃣ ✨</b> ¡Mientras vuela, <b>toca la pantalla</b> y usa su poder!</li>
@@ -261,8 +291,8 @@
 
     <div class="capa" id="capaNiveles">
       <div class="panel">
-        <h2>🗺️ 30 niveles</h2>
-        <p>Del 1 al 30, cada vez más difícil. ¡Consigue las 3 estrellas!</p>
+        <h2>🗺️ 60 niveles</h2>
+        <p>Del 1 al 60, cada vez más difícil. ¡Consigue las 3 estrellas!</p>
         <div class="mapa" id="mapa"></div>
         <button class="grande azul" id="nivelesCerrar">👍 LISTO</button>
       </div>
@@ -277,9 +307,25 @@
           <button id="avesAzar">🎲 Al azar</button>
           <button id="avesVariado">🌈 Variados</button>
           <button id="avesVacia">🧽 Vaciar</button>
+          <button id="avesGrande">🔍 Verlos en grande</button>
         </div>
         <div class="listaAves" id="listaAves"></div>
         <button class="grande" id="avesListo">👍 LISTO</button>
+      </div>
+    </div>
+
+    <div class="capa" id="capaAlbum">
+      <div class="panel">
+        <h2 id="albNombre">Rojo</h2>
+        <p class="albserie" id="albSerie">Los clásicos</p>
+        <canvas id="albLienzo" width="900" height="900"></canvas>
+        <div><span class="albpoder" id="albPoder">💥 Grito</span></div>
+        <div class="ajuste">
+          <button class="flecha" id="albAtras" title="Anterior">◀️</button>
+          <button class="grande" id="albMete">➕ AL TIRACHINAS</button>
+          <button class="flecha" id="albAlante" title="Siguiente">▶️</button>
+        </div>
+        <button class="grande azul" id="albCerrar">👍 LISTO</button>
       </div>
     </div>
 
@@ -426,6 +472,31 @@ function cerdo(x,y){ return [ {t:'pig',x,y:(y===undefined?SUELO-34:y)} ]; }
 function tnt(x,p){ return [ {t:'tnt',x,y:base(p)-32} ]; }
 function techo(x,p){ const b=base(p); return [ {t:'beam',x,y:b-198} ]; }
 
+function bunker(x,p){ const b=base(p);
+  return [ {t:'stone',x:x-80,y:b-40}, {t:'stone',x:x+80,y:b-40}, {t:'beam',x,y:b-98} ]; }
+function enBunker(x,p){ return [ {t:'pig',x,y:base(p)-34} ]; }
+function sobreBunker(x,p){ return [ {t:'pig',x,y:base(p)-150} ]; }
+function torreMixta(x,n,p){ const b=base(p), a=[];
+  for(let i=0;i<n;i++) a.push({t:(i%2?'ice':'stone'), x, y:b-40-80*i}); return a; }
+const P_PIEDRA = 196;                        // piedra(80+80) + viga(36)
+function torreAncha(x,n,t,p){ const b=base(p), a=[];
+  for(let i=0;i<n;i++){ a.push({t:t||'stone',x:x-40,y:b-40-80*i}); a.push({t:t||'stone',x:x+40,y:b-40-80*i}); }
+  a.push({t:'beam',x,y:b-80*n-18}); return a; }
+function torreAnchaMixta(x,n,p){ const b=base(p), a=[];
+  for(let i=0;i<n;i++){ const t=(i%2?'ice':'stone');
+    a.push({t,x:x-40,y:b-40-80*i}); a.push({t,x:x+40,y:b-40-80*i}); }
+  a.push({t:'beam',x,y:b-80*n-18}); return a; }
+function cimaTorre(x,n,p){ return [ {t:'pig',x,y:base(p)-80*n-70} ]; }
+function chozaPiedra2(x){ const b=SUELO-P_PIEDRA;
+  return [ {t:'stone',x:x-80,y:b-40}, {t:'stone',x:x-80,y:b-120},
+           {t:'stone',x:x+80,y:b-40}, {t:'stone',x:x+80,y:b-120}, {t:'beam',x,y:b-178} ]; }
+function dentroP2(x){ return [ {t:'pig',x,y:SUELO-P_PIEDRA-34} ]; }
+function encimaP2(x){ return [ {t:'pig',x,y:SUELO-P_PIEDRA*2-34} ]; }
+function bunker2(x){ const b=SUELO-116;      // el segundo piso, justo encima del primero
+  return [ {t:'stone',x:x-80,y:b-40}, {t:'stone',x:x+80,y:b-40}, {t:'beam',x,y:b-98} ]; }
+function enBunker2(x){ return [ {t:'pig',x,y:SUELO-116-34} ]; }
+function jefe(x,y){ return [ {t:'pigjefe',x,y:(y===undefined?SUELO-46:y)} ]; }
+
 function N(equipo, ...grupos){
   return { equipo, piezas: piezasOk([].concat.apply([],grupos)) };
 }
@@ -442,7 +513,7 @@ const NIVELES = [
   N(['rojo','rayo','bomba','rojo'], choza(900), dentro(900), torre(1220,3,'ice'), cerdo(1220,SUELO-274), tnt(1080)),
   N(['rojo','rayo','azules','rojo'], choza(820), dentro(820), choza(1120), dentro(1120), choza(1420), dentro(1420)),
   N(['rayo','bomba','rojo','azules'], chozaPiedra(1000), dentro(1000), torre(1350,2,'ice'), cerdo(1350,SUELO-194)),
-  N(['rojo','rayo','bomba','rojo'], piramide(1150,'stone'), cerdo(1150,SUELO-274), fila(820,2,'ice'), cerdo(860,SUELO-114)),
+  N(['rojo','rayo','bomba','rojo'], piramide(1150,'stone'), cerdo(1150,SUELO-274), fila(820,3,'ice'), cerdo(900,SUELO-114)),
   N(['rojo','rayo','bomba','azules','rojo'], choza(900), dentro(900), choza(900,1), dentro(900,1),
     torre(1300,4,'ice'), cerdo(1300,SUELO-354), tnt(1120)),
 
@@ -450,7 +521,7 @@ const NIVELES = [
   N(['rayo','bomba','blanca','rojo'], chozaPiedra(880), dentro(880), choza(1240), dentro(1240), encima(1240)),
   N(['rojo','rayo','azules','blanca'], choza(820), dentro(820), torre(1080,3,'ice'), cerdo(1080,SUELO-274),
     choza(1380), dentro(1380)),
-  N(['bomba','rayo','rojo','azules','blanca'], chozaPiedra(1000), dentro(1000), chozaPiedra(1000,1), dentro(1000,1), tnt(1300)),
+  N(['bomba','rayo','rojo','azules','blanca'], chozaPiedra(1000), dentro(1000), dentroP2(1000), tnt(1300)),
   N(['rojo','rayo','bomba','bumeran'], choza(760), dentro(760), fila(1000,4,'ice'), cerdo(1040,SUELO-114),
     cerdo(1200,SUELO-114), choza(1420), dentro(1420)),
   N(['rayo','bomba','azules','blanca','rojo'], piramide(900,'stone'), cerdo(900,SUELO-274),
@@ -464,36 +535,119 @@ const NIVELES = [
   N(['bomba','rayo','blanca','rojo','azules'], chozaPiedra(900), dentro(900), tnt(1100),
     chozaPiedra(1300), dentro(1300), encima(1300)),
   N(['rojo','rayo','bomba','burbuja','blanca'], choza(780), dentro(780), fila(1000,5,'stone'),
-    cerdo(1040,SUELO-114), cerdo(1200,SUELO-114), cerdo(1360,SUELO-114)),
+    cerdo(1000,SUELO-114), cerdo(1160,SUELO-114), cerdo(1320,SUELO-114)),
   N(['rayo','bomba','plata','azules','rojo'], choza(850), dentro(850), choza(850,1), dentro(850,1),
     choza(1300), dentro(1300), choza(1300,1), dentro(1300,1), tnt(1075)),
 
   /* 21-25 — de verdad difícil */
-  N(['bomba','rayo','hielo','blanca','rojo'], chozaPiedra(880), dentro(880), chozaPiedra(880,1), dentro(880,1),
-    torre(1300,5,'ice'), cerdo(1300,SUELO-434), cerdo(1500)),
+  N(['bomba','rayo','hielo','blanca','rojo'], chozaPiedra(880), dentro(880), dentroP2(880),
+    torreAncha(1300,4,'ice'), cimaTorre(1300,4), cerdo(1500)),
   N(['rayo','laser','bomba','azules','blanca'], piramide(820,'stone'), cerdo(820,SUELO-274),
     piramide(1120,'stone'), cerdo(1120,SUELO-274), piramide(1420,'stone'), cerdo(1420,SUELO-274)),
   N(['rojo','rayo','bomba','bumeran','plata'], choza(760), dentro(760), encima(760),
     chozaPiedra(1080), dentro(1080), choza(1400), dentro(1400), encima(1400), tnt(920)),
-  N(['bomba','hielo','rayo','blanca','azules'], torre(700,5,'stone'), cerdo(700,SUELO-434),
-    choza(1020), dentro(1020), choza(1020,1), dentro(1020,1), torre(1380,5,'ice'), cerdo(1380,SUELO-434)),
-  N(['rayo','bomba','laser','blanca','rojo','azules'], chozaPiedra(820), dentro(820), chozaPiedra(820,1), dentro(820,1),
-    chozaPiedra(1260), dentro(1260), chozaPiedra(1260,1), dentro(1260,1), tnt(1040)),
+  N(['bomba','hielo','rayo','blanca','azules'], torreAncha(700,4,'stone'), cimaTorre(700,4),
+    choza(1020), dentro(1020), choza(1020,1), dentro(1020,1), torreAncha(1380,4,'ice'), cimaTorre(1380,4)),
+  N(['rayo','bomba','laser','blanca','rojo','azules'], chozaPiedra(820), dentro(820), dentroP2(820),
+    chozaPiedra(1260), dentro(1260), dentroP2(1260), tnt(1040)),
 
   /* 26-30 — para campeones */
   N(['bomba','rayo','aguila','blanca','azules'], piramide(760,'stone'), cerdo(760,SUELO-274),
     choza(1080), dentro(1080), choza(1080,1), dentro(1080,1), encima(1080,1),
-    torre(1420,5,'ice'), cerdo(1420,SUELO-434)),
+    torreAncha(1420,4,'ice'), cimaTorre(1420,4)),
   N(['rayo','bomba','hielo','plata','blanca'], fila(700,3,'stone'), cerdo(780,SUELO-114),
     choza(1080), dentro(1080), encima(1080), chozaPiedra(1420), dentro(1420), tnt(940), tnt(1260)),
-  N(['bomba','laser','rayo','azules','blanca','rojo'], chozaPiedra(760), dentro(760), chozaPiedra(760,1), dentro(760,1),
-    torre(1080,6,'ice'), cerdo(1080,SUELO-514), chozaPiedra(1400), dentro(1400), chozaPiedra(1400,1), dentro(1400,1)),
+  N(['bomba','laser','rayo','azules','blanca','rojo'], chozaPiedra(760), dentro(760), dentroP2(760),
+    torreAncha(1080,4,'ice'), cimaTorre(1080,4), chozaPiedra(1400), dentro(1400), dentroP2(1400)),
   N(['rayo','bomba','aguila','hielo','blanca'], piramide(720,'stone'), cerdo(720,SUELO-274),
     piramide(1020,'stone'), cerdo(1020,SUELO-274), piramide(1320,'stone'), cerdo(1320,SUELO-274),
     torre(1500,4,'ice'), cerdo(1500,SUELO-354), tnt(870), tnt(1170)),
-  N(['aguila','bomba','rayo','laser','blanca','azules'], chozaPiedra(700), dentro(700), chozaPiedra(700,1), dentro(700,1),
+  N(['aguila','bomba','rayo','laser','blanca','azules'], chozaPiedra(700), dentro(700), dentroP2(700),
     choza(1020), dentro(1020), choza(1020,1), dentro(1020,1), encima(1020,1),
-    chozaPiedra(1340), dentro(1340), chozaPiedra(1340,1), dentro(1340,1), tnt(860), tnt(1180), cerdo(1520)),
+    chozaPiedra(1340), dentro(1340), dentroP2(1340), tnt(860), tnt(1180), cerdo(1520)),
+
+  /* ===== 31-40 — la segunda vuelta: hay que apuntar de verdad ===== */
+  N(['rayo','bomba','blanca','azules','rojo'], bunker(820), enBunker(820), sobreBunker(820),
+    choza(1180), dentro(1180), torre(1460,3,'ice'), cerdo(1460,SUELO-274)),
+  N(['bomba','rayo','plata','blanca','rojo'], bunker(760), enBunker(760), bunker(1060), enBunker(1060),
+    bunker(1360), enBunker(1360), tnt(910), tnt(1210)),
+  N(['rayo','laser','bomba','azules','blanca'], torreAncha(820,4,'stone'), cimaTorre(820,4),
+    choza(1150), dentro(1150), encima(1150), torreAncha(1480,4,'stone'), cimaTorre(1480,4)),
+  N(['bomba','hielo','rayo','blanca','rojo'], chozaPiedra(900), dentro(900), dentroP2(900),
+    bunker(1300), enBunker(1300), sobreBunker(1300), fila(1480,3,'ice'), cerdo(1560,SUELO-114)),
+  N(['rayo','bomba','bumeran','plata','azules','rojo'], piramide(760,'stone'), cerdo(760,SUELO-274),
+    bunker(1080), enBunker(1080), piramide(1400,'wood'), cerdo(1400,SUELO-274), tnt(920), tnt(1240)),
+  N(['aguila','rayo','bomba','blanca','azules'], chozaPiedra(780), dentro(780), dentroP2(780),
+    torreAncha(1120,4,'stone'), cimaTorre(1120,4), chozaPiedra(1440), dentro(1440)),
+  N(['bomba','rayo','laser','hielo','blanca','rojo'], bunker(720), enBunker(720), bunker(1000), enBunker(1000),
+    bunker(1280), enBunker(1280), bunker(1520), enBunker(1520), tnt(860), tnt(1400)),
+  N(['rayo','bomba','plata','aguila','azules'], choza(800), dentro(800), choza(800,1), dentro(800,1),
+    encima(800,1), torreAncha(1160,4,'stone'), cimaTorre(1160,4), choza(1480), dentro(1480)),
+  N(['bomba','hielo','rayo','blanca','laser','rojo'], piramide(780,'stone'), cerdo(780,SUELO-274),
+    piramide(1080,'stone'), cerdo(1080,SUELO-274), piramide(1380,'stone'), cerdo(1380,SUELO-274),
+    fila(1480,3,'ice'), cerdo(1560,SUELO-114), tnt(930), tnt(1230)),
+  N(['aguila','bomba','rayo','blanca','azules','plata'], chozaPiedra(760), dentro(760), dentroP2(760),
+    bunker(1120), enBunker(1120), sobreBunker(1120), chozaPiedra(1460), dentro(1460), dentroP2(1460)),
+
+  /* ===== 41-50 — fortalezas de verdad ===== */
+  N(['bomba','rayo','laser','hielo','blanca','aguila'], torreAncha(760,4,'stone'), cimaTorre(760,4),
+    bunker(1120), enBunker(1120), torreAncha(1460,4,'stone'), cimaTorre(1460,4), tnt(940), tnt(1290)),
+  N(['rayo','bomba','plata','blanca','azules','rojo'], choza(720), dentro(720), choza(720,1), dentro(720,1),
+    choza(1060), dentro(1060), choza(1060,1), dentro(1060,1),
+    choza(1400), dentro(1400), choza(1400,1), dentro(1400,1)),
+  N(['aguila','bomba','hielo','rayo','laser'], chozaPiedra(820), dentro(820), dentroP2(820),
+    piramide(1180,'stone'), cerdo(1180,SUELO-274), chozaPiedra(1500), dentro(1500), tnt(1000), tnt(1340)),
+  N(['bomba','rayo','blanca','azules','plata','rojo'], bunker(700), enBunker(700), bunker2(700), enBunker2(700),
+    torreAncha(1040,4,'ice'), cimaTorre(1040,4), bunker(1380), enBunker(1380), bunker2(1380), enBunker2(1380)),
+  N(['aguila','rayo','bomba','hielo','blanca','laser'], torreAncha(740,4,'stone'), cimaTorre(740,4),
+    chozaPiedra(1080), dentro(1080), dentroP2(1080),
+    torreAncha(1440,4,'stone'), cimaTorre(1440,4)),
+  N(['bomba','laser','rayo','azules','blanca','plata'], piramide(740,'stone'), cerdo(740,SUELO-274),
+    bunker(1040), enBunker(1040), sobreBunker(1040), piramide(1340,'stone'), cerdo(1340,SUELO-274),
+    jefe(1520), tnt(890), tnt(1190)),
+  N(['aguila','bomba','rayo','hielo','blanca','azules'], chozaPiedra(720), dentro(720), dentroP2(720),
+    chozaPiedra(1080), dentro(1080), dentroP2(1080),
+    chozaPiedra(1440), dentro(1440), dentroP2(1440), tnt(900), tnt(1260)),
+  N(['bomba','rayo','plata','laser','blanca','aguila'], torreAncha(700,4,'stone'), cimaTorre(700,4),
+    bunker(1060), enBunker(1060), jefe(1240), torreAncha(1440,4,'stone'), cimaTorre(1440,4), tnt(880)),
+  N(['aguila','hielo','bomba','rayo','blanca','azules'], torreAncha(760,4,'stone'), cimaTorre(760,4),
+    chozaPiedra(1120), dentro(1120), dentroP2(1120),
+    torreAncha(1480,4,'stone'), cimaTorre(1480,4), tnt(950), tnt(1300)),
+  N(['bomba','aguila','rayo','laser','blanca','plata'], bunker(700), enBunker(700), bunker2(700), enBunker2(700),
+    piramide(1060,'stone'), cerdo(1060,SUELO-274), jefe(1240),
+    bunker(1420), enBunker(1420), bunker2(1420), enBunker2(1420), tnt(880), tnt(1340)),
+
+  /* ===== 51-60 — para campeones de verdad ===== */
+  N(['aguila','bomba','rayo','hielo','laser','blanca'], chozaPiedra(700), dentro(700), dentroP2(700),
+    torreAncha(1060,4,'stone'), cimaTorre(1060,4), chozaPiedra(1420), dentro(1420), dentroP2(1420),
+    jefe(1540), tnt(880), tnt(1240)),
+  N(['bomba','aguila','rayo','azules','blanca','plata'], bunker(720), enBunker(720), sobreBunker(720),
+    bunker(1000), enBunker(1000), sobreBunker(1000), bunker(1280), enBunker(1280), sobreBunker(1280),
+    bunker(1520), enBunker(1520), tnt(860), tnt(1140)),
+  N(['aguila','bomba','hielo','rayo','laser','blanca'], torreAncha(700,4,'stone'), cimaTorre(700,4),
+    chozaPiedra(1080), dentro(1080), dentroP2(1080),
+    torreAncha(1460,4,'stone'), cimaTorre(1460,4), tnt(890), tnt(1280)),
+  N(['bomba','rayo','aguila','blanca','azules','laser'], piramide(720,'stone'), cerdo(720,SUELO-274),
+    piramide(1020,'stone'), cerdo(1020,SUELO-274), piramide(1320,'stone'), cerdo(1320,SUELO-274),
+    jefe(1520), fila(1440,3,'ice'), cerdo(1520,SUELO-114), tnt(870), tnt(1170)),
+  N(['aguila','bomba','hielo','laser','rayo','plata'], chozaPiedra(720), dentro(720), dentroP2(720),
+    bunker(1060), enBunker(1060), bunker2(1060), enBunker2(1060),
+    chozaPiedra(1420), dentro(1420), dentroP2(1420), tnt(890), tnt(1250)),
+  N(['inv_camion','bomba','aguila','rayo','blanca','hielo'], torreAncha(700,4,'stone'), cimaTorre(700,4),
+    chozaPiedra(1060), dentro(1060), dentroP2(1060),
+    torreAncha(1420,4,'stone'), cimaTorre(1420,4), jefe(1540), tnt(880), tnt(1240)),
+  N(['inv_tomas','bomba','rayo','aguila','laser','blanca'], bunker(700), enBunker(700), bunker2(700), enBunker2(700),
+    torreAncha(1040,4,'stone'), cimaTorre(1040,4), bunker(1380), enBunker(1380), bunker2(1380), enBunker2(1380),
+    jefe(1540), tnt(870), tnt(1210)),
+  N(['inv_rayoveloz','aguila','bomba','hielo','rayo','blanca'], chozaPiedra(700), dentro(700), dentroP2(700),
+    piramide(1060,'stone'), cerdo(1060,SUELO-274), jefe(1240),
+    chozaPiedra(1420), dentro(1420), dentroP2(1420), tnt(880), tnt(1340)),
+  N(['aguila','bomba','inv_camion','rayo','laser','hielo'], torreAncha(700,4,'stone'), cimaTorre(700,4),
+    bunker(1060), enBunker(1060), bunker2(1060), enBunker2(1060),
+    torreAncha(1420,4,'stone'), cimaTorre(1420,4), jefe(1540), tnt(890), tnt(1250)),
+  N(['aguila','bomba','rayo','hielo','laser','blanca'], chozaPiedra(700), dentro(700), dentroP2(700),
+    torreAncha(1040,4,'stone'), cimaTorre(1040,4), chozaPiedra(1400), dentro(1400), dentroP2(1400),
+    jefe(1540), cerdo(1240), tnt(870), tnt(1200)),
 ];
 
 /* niveles sueltos del botón 🎲 dentro del editor */
@@ -674,11 +828,11 @@ const PODERES = {
   salto:         { icono:'🦘', nombre:'Rebote',    que:'Da un supersalto' },
   teletransporte:{ icono:'✨', nombre:'Chispa',    que:'Aparece más adelante de golpe' },
   tambor:        { icono:'🥁', nombre:'Tambor',    que:'Un tamborazo que empuja fuerte' },
-  tren:          { icono:'🚂', nombre:'Vapor',     que:'Sale de frente como un tren' },
-  turbo:         { icono:'🏎️', nombre:'Turbo',     que:'Nitro: acelera y arrasa' },
+  tren:          { icono:'🚂', nombre:'Locomotora',que:'¡Chuu-chuu! Recto y sin frenar' },
+  turbo:         { icono:'🏎️', nombre:'Nitro',     que:'Se enciende y al chocar revienta' },
   tropa:         { icono:'👥', nombre:'Tropa',     que:'Llama a sus amigos: se hace cuatro' },
   zarpazo:       { icono:'🐻', nombre:'Zarpazo',   que:'Un zarpazo que revienta la madera' },
-  ruedas:        { icono:'🛞', nombre:'Ruedas',    que:'Pisa el acelerador y arrolla' },
+  ruedas:        { icono:'🛞', nombre:'Arrollar',  que:'Acelera pegado al suelo, sin parar' },
 };
 
 const AVES = {
@@ -825,7 +979,7 @@ function dibujaAve(a, x, y, ang, r){
   if(a.img){                                    // invitado recortado o dibujo del niño
     const im = a.img;
     if(!(im.complete && im.naturalWidth)){ aveCargando(x,y,r); return; }
-    const lado=r*3.05, k=Math.min(lado/im.naturalWidth, lado/im.naturalHeight);
+    const lado=r*3.45, k=Math.min(lado/im.naturalWidth, lado/im.naturalHeight);
     const w=im.naturalWidth*k, h=im.naturalHeight*k;
     ctx.save(); ctx.translate(x,y); ctx.rotate(ang||0);
     if(a.voltea) ctx.scale(-1,1);            // el dibujo miraba al revés
@@ -1186,8 +1340,9 @@ function creaMundo(){
 
   S.piezas.forEach(p=>{
     const d=TIPOS[p.t]; if(!d) return;
-    const op = { density:d.dens, friction:.62, frictionStatic:.9, restitution:.06,
-                 frictionAir:.008, slop:.02 };
+    const cerdo = (p.t==='pig' || p.t==='pigjefe');
+    const op = { density:d.dens, friction: cerdo?.95:.62, frictionStatic: cerdo?1.4:.9,
+                 restitution:.06, frictionAir: cerdo?.03:.008, slop:.02 };
     const b = d.forma==='circ' ? Bodies.circle(p.x,p.y,d.r,op) : Bodies.rectangle(p.x,p.y,d.w,d.h,op);
     b.datos = { t:p.t, hp:d.hp, max:d.hp, muerto:false };
     Composite.add(S.motor.world,b); S.cuerpos.push(b);
@@ -1199,6 +1354,13 @@ function creaMundo(){
       const rv = Math.hypot(a.velocity.x-b.velocity.x, a.velocity.y-b.velocity.y);
       if(rv < 5) continue;
       if(rv > 7) SFX.golpe();
+      for(const cual of [a,b]){
+        if(cual.datos && cual.datos.nitro && rv > 9){
+          cual.datos.nitro=false;
+          onda(cual.position.x, cual.position.y, 210, 17, '#ff7b2e');
+          chispas(cual.position.x, cual.position.y, '#ffd93b', 22, 10);
+        }
+      }
       daña(a,rv,b); daña(b,rv,a);
     }
   });
@@ -1348,9 +1510,15 @@ function usaPoder(m){
       case 'tambor':  onda(P.x,P.y,250,19,'#ffd93b'); break;
       case 'zarpazo': onda(P.x,P.y,260,21,'#e9d8b8'); d.pot*=1.6; break;
       case 'acelera': Body.setVelocity(b,{x:V.x/vel*(vel+20), y:V.y/vel*(vel+20)}); d.pot*=1.8; estela(P,'#ffe14d'); break;
-      case 'turbo':   Body.setVelocity(b,{x:Math.abs(V.x/vel)*(vel+30), y:V.y/vel*(vel+30)*.5}); d.pot*=2.1; estela(P,'#ff7b2e'); break;
-      case 'tren':    Body.setVelocity(b,{x:Math.max(34,Math.abs(V.x)+18), y:-1}); d.pot*=1.9; estela(P,'#e9f4ff'); break;
-      case 'ruedas':  Body.setVelocity(b,{x:Math.max(30,Math.abs(V.x)+14), y:12}); d.pot*=2.2; estela(P,'#cfd6e2'); break;
+      case 'turbo':   // nitro: se pone a arder y al chocar revienta
+        d.turbo=50; d.nitro=true; d.pot*=2.4; estela(P,'#ff7b2e');
+        tono(200,1400,.35,'sawtooth',.20); ruido(.45,.22,2200); break;
+      case 'tren':    // ¡chuu-chuu! locomotora imparable en línea recta
+        d.tren=60; d.pot*=2.4; estela(P,'#e9f4ff');
+        tono(320,180,.5,'square',.20); tono(180,120,.6,'sawtooth',.14); ruido(.5,.18,700); break;
+      case 'ruedas':  // pisa el acelerador y arrolla pegado al suelo
+        d.ruedas=75; d.pot*=2.4; estela(P,'#cfd6e2');
+        tono(90,60,.6,'sawtooth',.22); ruido(.6,.2,500); break;
       case 'explota': explota(P.x,P.y,300); quitaAve(b); break;
       case 'divide':  divide(b,2); break;
       case 'tropa':   divide(b,3); break;
@@ -1374,6 +1542,32 @@ function usaPoder(m){
     SFX.poder();
   }
   return algo;
+}
+
+/* poderes que duran un rato: se empujan en cada frame */
+function estadosAves(){
+  for(const b of S.aves){
+    const d=b.datos; if(!d) continue;
+    const P=b.position, V=b.velocity;
+    if(d.tren>0){                        // Tomás: locomotora recta e imparable
+      d.tren--;
+      Body.setVelocity(b,{x:Math.max(32,Math.abs(V.x)), y:V.y*0.12});
+      if(S.tiempo%2===0){ chispas(P.x-30,P.y-22,'#ffffff',2,2); chispas(P.x-26,P.y-30,'#e6f0fa',1,2); }
+      if(d.tren===0) chispas(P.x,P.y,'#dfe9f5',12,5);
+    }
+    if(d.turbo>0){                       // Rayo Veloz: nitro con llamarada
+      d.turbo--;
+      const v=Math.hypot(V.x,V.y)||1, obj=Math.max(v,34);
+      Body.setVelocity(b,{x:V.x/v*obj, y:V.y/v*obj*0.9});
+      chispas(P.x-22,P.y+2, (S.tiempo%2)?'#ffd93b':'#ff7b2e', 2, 3);
+    }
+    if(d.ruedas>0){                      // Race Ace: arrollando por el suelo
+      d.ruedas--;
+      Body.setVelocity(b,{x:Math.max(28,Math.abs(V.x)), y:Math.max(V.y,4)});
+      Body.setAngularVelocity(b, 0.45);
+      if(S.tiempo%3===0) chispas(P.x-26,P.y+18,'#c9a05a',2,3);
+    }
+  }
 }
 
 function cerditosVivos(){
@@ -1443,6 +1637,7 @@ function pintaJugar(){
     } else {
       const flot = Math.sin(S.tiempo*0.06)*3;
       dibujaAve(ave, HORQ.x, HORQ.y-4+flot, 0, rr);
+      carteldelPoder(ave);
       ctx.save(); ctx.font='40px serif'; ctx.textAlign='center';
       ctx.globalAlpha=.75+Math.sin(S.tiempo*0.1)*.25;
       ctx.fillText('👈', HORQ.x+78+Math.sin(S.tiempo*0.1)*10, HORQ.y+14); ctx.restore();
@@ -1465,15 +1660,55 @@ function pintaJugar(){
   ctx.restore();
 }
 
+/* cartel con el pájaro que toca y su poder, en el hueco de la izquierda */
+function carteldelPoder(a){
+  const p = poderDe(a), x = SLING.x, y = SLING.y - 336;
+  const t1 = a.nombre.toUpperCase();
+  const t2 = p.icono + ' ' + p.nombre.toUpperCase();
+  ctx.save();
+  ctx.font = 'bold 27px Verdana';
+  const an = Math.max(ctx.measureText(t1).width, ctx.measureText(t2).width) + 46;
+  ctx.translate(x, y);
+  // tarjeta
+  ctx.fillStyle = 'rgba(255,248,226,.96)';
+  ctx.strokeStyle = '#a86b1e'; ctx.lineWidth = 5;
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(-an/2,-46,an,96,18); else ctx.rect(-an/2,-46,an,96);
+  ctx.fill(); ctx.stroke();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#c94a00'; ctx.font='bold 25px Verdana';
+  ctx.fillText(t1, 0, -22);
+  // pastilla del poder
+  const anP = ctx.measureText(t2).width + 26;
+  ctx.fillStyle='#ffe14d'; ctx.strokeStyle='#c9a400'; ctx.lineWidth=3;
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(-anP/2, 2, anP, 40, 14); else ctx.rect(-anP/2,2,anP,40);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#6b3d06'; ctx.font='bold 23px Verdana';
+  ctx.fillText(t2, 0, 23);
+  // recordatorio de cómo se usa
+  if(p!==PODERES.ninguno){
+    ctx.globalAlpha = .7 + Math.sin(S.tiempo*0.09)*.3;
+    ctx.fillStyle='#5a3a12'; ctx.font='bold 19px Verdana';
+    ctx.fillText('👆 tócalo al volar', 0, 68);
+  }
+  ctx.restore();
+}
+
 /* globito pequeño encima del pájaro: "tócame y uso mi poder" */
 function pistaPoder(b, a){
-  const p = poderDe(a), x=b.position.x, y=b.position.y-(b.datos.r||26)-30;
+  const p = poderDe(a), x=b.position.x, y=b.position.y-(b.datos.r||26)-38;
   const late = 1 + Math.sin(S.tiempo*0.18)*0.10;
   ctx.save(); ctx.translate(x,y); ctx.scale(late,late);
-  ctx.fillStyle='rgba(255,255,255,.92)'; ctx.beginPath(); ctx.arc(0,0,19,0,7); ctx.fill();
-  ctx.strokeStyle='#c94a00'; ctx.lineWidth=3.5; ctx.stroke();
-  ctx.font='20px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(p.icono,0,1);
+  ctx.font='bold 21px Verdana'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  const txt = p.nombre.toUpperCase(), an = ctx.measureText(txt).width + 58;
+  ctx.fillStyle='rgba(255,248,226,.96)'; ctx.strokeStyle='#c94a00'; ctx.lineWidth=4;
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(-an/2,-20,an,40,16); else ctx.rect(-an/2,-20,an,40);
+  ctx.fill(); ctx.stroke();
+  ctx.font='22px serif'; ctx.fillText(p.icono, -an/2+22, 1);
+  ctx.fillStyle='#c94a00'; ctx.font='bold 19px Verdana';
+  ctx.fillText(txt, 10, 1);
   ctx.restore();
 }
 
@@ -1493,6 +1728,7 @@ function bucle(){
   if(S.modo==='jugar' && S.motor){
     if(!parado){
       Engine.update(S.motor, 1000/60);
+      estadosAves();
       for(const b of S.cuerpos.slice()) if(b.position.y > H+400) destruye(b);
       for(const h of S.huevos.slice()) if(h.position.y > H+300) destruye(h);
       for(const b of S.aves.slice()){
@@ -1700,6 +1936,10 @@ document.getElementById('btnMusica').onclick=e=>{
 };
 
 window.addEventListener('keydown', e=>{
+  if(document.getElementById('capaAlbum').classList.contains('on')){
+    if(e.key==='ArrowLeft'){ albMueve(-1); return; }
+    if(e.key==='ArrowRight'){ albMueve(1); return; }
+  }
   if(e.key==='Escape'){ document.querySelectorAll('.capa.on').forEach(c=>c.classList.remove('on')); }
   if(S.modo==='construir' && (e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); deshacer(); }
   if(S.modo==='jugar' && e.key===' '){ e.preventDefault(); usaPoder(null); }
@@ -1752,19 +1992,54 @@ function miniAve(id, lado){
   pintaAveEn(c,id);
   return c;
 }
-function pintaAveEn(c,id){
+function pintaAveEn(c,id,grande){
   const a=getAve(id), g=c.getContext('2d'), prev=ctx;
   ctx = g;
   g.clearRect(0,0,c.width,c.height);
-  const r = a.r||26, k = (c.width*0.94)/(r*3.6);
-  g.save(); g.translate(c.width/2 + r*k*0.28, c.height/2); g.scale(k,k);
-  try{ dibujaAve(a,0,0,0,r); }catch(e){}
-  g.restore();
+  if(grande && a.img && a.img.complete && a.img.naturalWidth){
+    // en el álbum la foto se pone a tamaño real, lo más grande que quepa
+    const m = c.width*0.06, lado = c.width - m*2;
+    const k = Math.min(lado/a.img.naturalWidth, lado/a.img.naturalHeight);
+    const w = a.img.naturalWidth*k, h = a.img.naturalHeight*k;
+    g.save(); g.translate(c.width/2, c.height/2);
+    g.drawImage(a.img, -w/2, -h/2, w, h); g.restore();
+  } else {
+    const r = a.r||26, k = (c.width*(grande?0.86:0.94))/(r*3.6);
+    g.save(); g.translate(c.width/2 + r*k*0.28, c.height/2); g.scale(k,k);
+    try{ dibujaAve(a,0,0,0,r); }catch(e){}
+    g.restore();
+  }
   ctx = prev;
   if(a.img && !a.img.complete){
-    a.img.addEventListener('load', ()=>{ try{ pintaAveEn(c,id); }catch(e){} }, {once:true});
+    a.img.addEventListener('load', ()=>{ try{ pintaAveEn(c,id,grande); }catch(e){} }, {once:true});
   }
 }
+
+/* ============================================================
+   ÁLBUM: los pájaros a pantalla completa
+   ============================================================ */
+let albN = 0;
+function abreAlbum(i){
+  const ids = todosLosIds();
+  albN = (typeof i==='number' ? i : Math.max(0, ids.indexOf(S.equipo[0])));
+  pintaAlbum();
+  document.getElementById('capaAlbum').classList.add('on');
+  SFX.clic();
+}
+function pintaAlbum(){
+  const ids = todosLosIds(); if(!ids.length) return;
+  albN = ((albN % ids.length) + ids.length) % ids.length;
+  const id = ids[albN], a = getAve(id), p = poderDe(a);
+  document.getElementById('albNombre').textContent = a.nombre;
+  document.getElementById('albSerie').textContent = (a.serie||'Otros') + '  ·  ' + (albN+1) + ' de ' + ids.length;
+  document.getElementById('albPoder').textContent = p.icono + '  ' + p.nombre + ' — ' + p.que;
+  pintaAveEn(document.getElementById('albLienzo'), id, true);
+  const dentro = S.equipo.indexOf(id) >= 0;
+  const b = document.getElementById('albMete');
+  b.textContent = dentro ? '✅ YA ESTÁ EN EL TIRACHINAS' : '➕ AL TIRACHINAS';
+  b.classList.toggle('azul', dentro);
+}
+function albMueve(d){ albN += d; pintaAlbum(); SFX.clic(); }
 function guardaEquipo(elegido){
   if(elegido) S.equipoElegido = true;
   try{
@@ -1785,7 +2060,9 @@ function pintaEquipo(){
     b.className='hueco'+(id?' lleno':'');
     if(id){
       b.appendChild(miniAve(id,60));
-      b.title = getAve(id).nombre;
+      const eti=document.createElement('span'); eti.className='pod';
+      eti.textContent=poderDe(getAve(id)).icono; b.appendChild(eti);
+      b.title = getAve(id).nombre + ': ' + poderDe(getAve(id)).que;
       b.onclick=()=>{ S.equipo.splice(i,1); guardaEquipo(true); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar(); };
     } else {
       b.textContent='+';
@@ -1842,6 +2119,15 @@ document.getElementById('avesVariado').onclick=()=>{
   const salto=Math.max(1,Math.floor(ids.length/MAX_EQUIPO));
   for(let i=0;i<ids.length && S.equipo.length<MAX_EQUIPO;i+=salto) S.equipo.push(ids[i]);
   guardaEquipo(true); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.poner();
+};
+document.getElementById('avesGrande').onclick=()=>abreAlbum();
+document.getElementById('albAtras').onclick =()=>albMueve(-1);
+document.getElementById('albAlante').onclick=()=>albMueve(1);
+document.getElementById('albCerrar').onclick=()=>{ document.getElementById('capaAlbum').classList.remove('on'); SFX.clic(); };
+document.getElementById('albMete').onclick=()=>{
+  const id = todosLosIds()[albN];
+  if(S.equipo.indexOf(id)>=0){ aviso('Ya está en el tirachinas 🐦'); return; }
+  añadeAve(id); pintaAlbum();
 };
 document.getElementById('avesVacia').onclick=()=>{
   S.equipo=[]; S.equipoElegido=false; guardaEquipo(); pintaEquipo(); pintaListaAves(); refrescaMarcador(true); SFX.borrar();

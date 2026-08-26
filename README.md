@@ -1,6 +1,6 @@
 # 🐦 Pájaros Locos
 
-Un juego tipo *Angry Birds* pensado para peques de **6 años**: **30 niveles** hechos con
+Un juego tipo *Angry Birds* pensado para peques de **6 años**: **60 niveles** hechos con
 dificultad progresiva, un **editor** para construir el tuyo, y **todos los pájaros**
 —cada uno con su poder— para elegir quién vuela.
 
@@ -9,7 +9,7 @@ dificultad progresiva, un **editor** para construir el tuyo, y **todos los pája
 
 ## Qué tiene
 
-- **🗺️ 30 niveles** de menos a más difícil: de una casita con un cerdito a fortalezas de
+- **🗺️ 60 niveles** de menos a más difícil: de una casita con un cerdito a fortalezas de
   piedra con TNT. Guarda las estrellas de cada uno (3 si te sobran pájaros).
 - **🔨 Modo construir**: tocas una pieza abajo y tocas la pantalla para ponerla.
   Cajas, vigas, columnas, hielo, piedra, TNT, cerditos y el cerdo jefe. Se arrastran para moverlas.
@@ -49,7 +49,9 @@ dificultad progresiva, un **editor** para construir el tuyo, y **todos los pája
 | Rosa / Amapola / Lucas / Dalia | 🫧 Burbujas · 🥁 Tambor · 🦘 Rebote · ✨ Teletransporte |
 | Hielo / Láser | ❄️ Congela · 🎯 Va a donde toques |
 | Águila | 🦅 Furia |
-| Invitados (Tomás, Rayo Veloz, Lemi, Grizzy, Camión) | 🚂 Vapor · 🏎️ Turbo · 👥 Tropa · 🐻 Zarpazo · 🛞 Ruedas |
+| **Tomás** (invitado) | 🚂 **Locomotora**: sale recto y sin frenar, atravesándolo todo |
+| **Rayo Veloz** (invitado) | 🏎️ **Nitro**: se enciende y al chocar revienta |
+| Lemi / Grizzy / Race Ace | 👥 Tropa (se hace cuatro) · 🐻 Zarpazo · 🛞 Arrollar por el suelo |
 
 ## Cómo está hecho
 
