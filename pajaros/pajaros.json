@@ -80,6 +80,19 @@
       "cerdo": true,
       "ancho": 420,
       "alto": 327
+    },
+    {
+      "id": "capitan-pico",
+      "nombre": "Capitán Pico",
+      "serie": "Hechos con IA",
+      "archivo": "capitan-pico.png",
+      "poder": "laser",
+      "r": 30,
+      "dens": 0.005,
+      "pot": 1.15,
+      "ancho": 395,
+      "alto": 420,
+      "desc": "un pájaro pirata azul con parche en el ojo y sombrero de capitán"
     }
   ]
 }

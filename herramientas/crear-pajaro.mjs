@@ -104,10 +104,13 @@ function ultimaImagenCodex(desde) {
 function pideACodex(texto, { timeoutMs = 600000, log = () => {} } = {}) {
   return new Promise((resolve, reject) => {
     const salidaUlt = path.join(os.tmpdir(), `pajaro-${Date.now()}.txt`);
+    const esWin = process.platform === "win32";
+    // En Windows codex es un .cmd: hay que pasar por el shell (y entrecomillar rutas).
+    const args = ["exec", "--sandbox", "workspace-write", "--cd", RAIZ, "-o", salidaUlt, "-"];
     const hijo = spawn(
-      process.platform === "win32" ? "codex.cmd" : "codex",
-      ["exec", "--sandbox", "workspace-write", "--cd", RAIZ, "-o", salidaUlt, "-"],
-      { stdio: ["pipe", "pipe", "pipe"] }
+      esWin ? "codex.cmd" : "codex",
+      esWin ? args.map((a) => (/\s/.test(a) ? `"${a}"` : a)) : args,
+      { stdio: ["pipe", "pipe", "pipe"], shell: esWin }
     );
     let out = "", err = "";
     const reloj = setTimeout(() => { hijo.kill(); reject(new Error("Codex ha tardado demasiado")); }, timeoutMs);

@@ -190,6 +190,19 @@
     .pieza{min-width:50px;padding:4px 6px}
     .logo{display:none}
   }
+  /* móvil apaisado: barras finitas para dejarle todo el sitio al juego */
+  @media (max-height:430px){
+    header{padding:3px 6px;gap:4px}
+    .modo{padding:5px 9px;border-width:3px;box-shadow:0 3px 0 #b8791d}
+    .mini{width:36px;height:36px;border-width:3px;font-size:16px;box-shadow:0 3px 0 #b8791d}
+    footer{padding:4px 6px}
+    .caja-marcador{padding:2px 8px;border-width:3px;box-shadow:0 3px 0 #7d4c12;gap:5px}
+    .caja-marcador .et{display:none}
+    .colaAves{min-height:26px}
+    .colaAves canvas{width:24px;height:24px}
+    .pieza{padding:3px 5px;border-width:3px;box-shadow:0 3px 0 #7d4c12}
+    .pieza .em{font-size:20px}
+  }
   @media (max-width:620px){
     .logo{display:none}
     .modo{padding:6px 9px}
