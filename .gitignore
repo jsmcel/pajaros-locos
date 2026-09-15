@@ -10,6 +10,8 @@ android/local.properties
 android/app/src/main/assets/index.html
 android/app/src/main/assets/matter.min.js
 android/app/src/main/assets/pajaros/
+android/app/src/main/assets/audio/
+output/
 
 # basura del sistema
 Thumbs.db

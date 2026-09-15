@@ -381,7 +381,7 @@
    - 30 niveles hechos, de menos a más difícil
    - editor de niveles (construye el tuyo)
    - todos los pájaros de todas las series, cada uno con su poder
-   - música y sonidos sintetizados (sin archivos)
+   - música local en bucle y efectos sintetizados
    Mundo virtual fijo de 1600x900 escalado al tamaño del canvas.
    ============================================================ */
 const { Engine, Bodies, Body, Composite, Events } = Matter;
@@ -655,15 +655,14 @@ const EJEMPLOS = [ NIVELES[1].piezas, NIVELES[6].piezas, NIVELES[12].piezas ];
 let ejemploN = 0;
 
 /* ============================================================
-   SONIDO Y MÚSICA (sintetizados, sin archivos)
+   EFECTOS SINTETIZADOS Y MÚSICA LOCAL
    ============================================================ */
-let actx = null, salidaSFX = null, salidaMUS = null;
+let actx = null, salidaSFX = null;
 function ac(){
   if(!actx){
     try{
       actx = new (window.AudioContext||window.webkitAudioContext)();
       salidaSFX = actx.createGain(); salidaSFX.gain.value = 0.9; salidaSFX.connect(actx.destination);
-      salidaMUS = actx.createGain(); salidaMUS.gain.value = 0;   salidaMUS.connect(actx.destination);
     }catch(e){}
   }
   return actx;
@@ -702,83 +701,34 @@ const SFX = {
   falla: ()=>{ [400,330,260].forEach((f,i)=>setTimeout(()=>tono(f,f*.8,.24,'sine',.16),i*150)); },
 };
 
-/* ---------- la musiquilla: marcha de pájaros en re menor ---------- */
-const MUS = {
-  on:true, arrancada:false, prox:0, paso:0, timer:null,
-  bpm:128,
-};
-const nota = n => 440*Math.pow(2,(n-69)/12);
-/* 8 compases de 8 corcheas */
-const RAICES  = [38,38,34,34,41,41,45,45];                    // Dm Dm Bb Bb F F A A
-const ACORDES = [[50,53,57],[50,53,57],[46,50,53],[46,50,53],
-                 [53,57,60],[53,57,60],[45,49,52],[45,49,52]];
-const BAJO    = [0,0,7,0,12,0,7,0];                           // dibujo del bajo por compás
-const MELO = [
-  69,69, 0,72, 0,69,67,65,
-  64, 0,64,65,67, 0,64,62,
-  65,65, 0,69, 0,65,64,62,
-  62, 0,62,64,65, 0,62, 0,
-  69, 0,72,74, 0,72,69,67,
-  65, 0,69,72, 0,69,67,65,
-  64, 0,67,69, 0,67,64,73,
-  74, 0, 0,69, 0,65,62, 0,
-];
-function voz(f,t,dur,tipo,vol){
-  const a=ac(); if(!a||!salidaMUS) return;
-  const o=a.createOscillator(), g=a.createGain();
-  o.type=tipo; o.frequency.setValueAtTime(f,t);
-  g.gain.setValueAtTime(0.0001,t);
-  g.gain.linearRampToValueAtTime(vol,t+0.014);
-  g.gain.exponentialRampToValueAtTime(0.0008,t+dur);
-  o.connect(g); g.connect(salidaMUS); o.start(t); o.stop(t+dur+0.05);
+/* ---------- música elegida: https://www.youtube.com/watch?v=DehK_Y0TUbE ---------- */
+const MUS = { on:true, arrancada:false };
+const musica = new Audio('audio/angry-birds-theme.mp3');
+musica.loop = true;
+musica.preload = 'none';
+musica.volume = 0.34;
+function pintaMusica(){
+  const b = document.getElementById('btnMusica');
+  b.classList.toggle('apagado', !MUS.on);
+  b.setAttribute('aria-pressed', String(MUS.on));
+  b.setAttribute('aria-label', MUS.on ? 'Apagar música' : 'Encender música');
+  b.title = musica.error ? 'No se pudo cargar la música' : (MUS.on ? 'Apagar música' : 'Encender música');
 }
-function percu(t,dur,vol,filtro,tipo){
-  const a=ac(); if(!a||!salidaMUS) return;
-  const n=Math.max(1,Math.floor(a.sampleRate*dur)), b=a.createBuffer(1,n,a.sampleRate), d=b.getChannelData(0);
-  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
-  const s=a.createBufferSource(); s.buffer=b;
-  const f=a.createBiquadFilter(); f.type=tipo||'lowpass'; f.frequency.value=filtro;
-  const g=a.createGain(); g.gain.value=vol;
-  s.connect(f); f.connect(g); g.connect(salidaMUS); s.start(t); s.stop(t+dur);
-}
-function tocaPaso(p, t){
-  const compas = (p>>3) & 7, dentroC = p & 7, dur = 30/MUS.bpm;
-  // bajo
-  const raiz = RAICES[compas] + BAJO[dentroC];
-  voz(nota(raiz), t, dur*0.9, 'square', 0.16);
-  voz(nota(raiz-12), t, dur*0.9, 'sine', 0.13);
-  // acorde suave al empezar el compás
-  if(dentroC===0) ACORDES[compas].forEach(n=>voz(nota(n), t, dur*3.4, 'triangle', 0.045));
-  // melodía
-  const m = MELO[p & 63];
-  if(m) { voz(nota(m), t, dur*1.25, 'sawtooth', 0.075); voz(nota(m+12), t, dur*0.7, 'triangle', 0.035); }
-  // percusión de marcha
-  if(dentroC===0 || dentroC===4) percu(t, .12, .34, 180);
-  if(dentroC===2 || dentroC===6) percu(t, .10, .16, 2600, 'highpass');
-  percu(t, .035, .07, 7000, 'highpass');
-}
-function planificaMusica(){
-  const a=ac(); if(!a || !MUS.on) return;
-  if(a.state==='suspended') return;
-  const paso = 30/MUS.bpm;
-  if(MUS.prox < a.currentTime) MUS.prox = a.currentTime + 0.08;
-  while(MUS.prox < a.currentTime + 0.35){
-    tocaPaso(MUS.paso, MUS.prox);
-    MUS.paso = (MUS.paso+1) & 63;
-    MUS.prox += paso;
+function actualizaMusica(){
+  if(!MUS.on || !MUS.arrancada || document.hidden){ musica.pause(); return; }
+  if(musica.paused){
+    const inicio = musica.play();
+    if(inicio) inicio.catch(()=>{ /* se vuelve a intentar con el siguiente gesto */ });
   }
 }
-function musicaVolumen(v){
-  const a=ac(); if(!a||!salidaMUS) return;
-  salidaMUS.gain.cancelScheduledValues(a.currentTime);
-  salidaMUS.gain.setTargetAtTime(v, a.currentTime, 0.25);
-}
 function musicaEnciende(){
-  const a=ac(); if(!a) return;
-  if(a.state==='suspended') a.resume();
-  if(!MUS.arrancada){ MUS.arrancada=true; MUS.prox=a.currentTime+0.1; MUS.timer=setInterval(planificaMusica,60); }
-  musicaVolumen(MUS.on ? 0.34 : 0);
+  MUS.arrancada = true;
+  actualizaMusica();
 }
+musica.addEventListener('error', pintaMusica);
+document.addEventListener('visibilitychange', actualizaMusica);
+window.addEventListener('pagehide', ()=>musica.pause());
+window.addEventListener('pageshow', actualizaMusica);
 
 /* ============================================================
    CANVAS Y ESCALADO
@@ -1931,8 +1881,7 @@ document.getElementById('btnSonido').onclick=e=>{ S.mudo=!S.mudo;
   if(!S.mudo) SFX.clic(); guardaAjustes(); };
 document.getElementById('btnMusica').onclick=e=>{
   MUS.on=!MUS.on; despierta();
-  e.currentTarget.classList.toggle('apagado', !MUS.on);
-  musicaVolumen(MUS.on?0.34:0); guardaAjustes(); SFX.clic();
+  pintaMusica(); guardaAjustes(); SFX.clic();
 };
 
 window.addEventListener('keydown', e=>{
@@ -2174,9 +2123,9 @@ function cargaAjustes(){
       S.mudo=!!j.mudo; MUS.on = j.musica!==false;
     }
   }catch(e){}
-  const bs=document.getElementById('btnSonido'), bm=document.getElementById('btnMusica');
+  const bs=document.getElementById('btnSonido');
   bs.textContent = S.mudo?'🔇':'🔊'; bs.classList.toggle('apagado', S.mudo);
-  bm.classList.toggle('apagado', !MUS.on);
+  pintaMusica();
 }
 
 /* ============================================================
@@ -2375,7 +2324,19 @@ try{ if(!localStorage.getItem('pajaros-locos-visto')) document.getElementById('c
 catch(e){ document.getElementById('capaAyuda').classList.add('on'); }
 /* la música necesita que el niño toque algo antes (lo piden los navegadores) */
 ['pointerdown','keydown','touchstart'].forEach(ev=>
-  window.addEventListener(ev, ()=>{ despierta(); }, {once:true}));
+  window.addEventListener(ev, e=>{
+    if(e.target.closest && e.target.closest('#btnMusica')) return;
+    despierta();
+  }, {passive:true}));
+window.render_game_to_text = ()=>JSON.stringify({
+  coordenadas:'origen arriba a la izquierda; x hacia la derecha, y hacia abajo',
+  modo:S.modo, nivel:S.nivel, pajarosUsados:S.pajarosUsados,
+  piezas:S.piezas.map(p=>({tipo:p.t,x:p.x,y:p.y})),
+  musica:{activada:MUS.on, reproduciendo:!musica.paused, tiempo:musica.currentTime,
+    duracion:Number.isFinite(musica.duration)?musica.duration:null, bucle:musica.loop,
+    error:musica.error?musica.error.code:null},
+  efectos:!S.mudo,
+});
 requestAnimationFrame(bucle);
 </script>
 </body>

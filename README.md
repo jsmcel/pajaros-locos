@@ -21,7 +21,7 @@ dificultad progresiva, un **editor** para construir el tuyo, y **todos los pája
   **recorta el dibujo, le quita el fondo y lo convierte en un pájaro más** de tu equipo.
 - **🎨 Fábrica de pájaros con IA**: describes un pájaro y ChatGPT lo dibuja sin fondo;
   aparece solo dentro del juego (ver abajo).
-- **🎵 Música** y sonidos sintetizados, sin archivos. Se apagan con 🎵 y 🔊.
+- **🎵 Música**: el tema del vídeo elegido, en bucle desde un archivo local. Se activa al tocar el juego, se pausa al dejarlo en segundo plano y se apaga con 🎵. Los efectos sintetizados se controlan aparte con 🔊.
 - Física de verdad (Matter.js) y todo en español.
 - Se guarda solo: nivel, equipo de pájaros, estrellas y dibujos.
 
@@ -59,6 +59,7 @@ dificultad progresiva, un **editor** para construir el tuyo, y **todos los pája
 index.html            El juego entero (HTML + CSS + JS, sin dependencias externas)
 crear.html            Página dedicada para inventar pájaros con IA
 matter.min.js         Motor de física
+audio/               Música local y referencia del vídeo de origen
 pajaros/              Pájaros en PNG sin fondo + pajaros.json (el juego los carga solo)
 imagenes/             Imágenes originales de las que salen los invitados
 herramientas/         Los scripts de fabricación (ver abajo)
@@ -129,6 +130,7 @@ hace falta el SDK de Android:
 ```bash
 cp index.html matter.min.js android/app/src/main/assets/
 cp -r pajaros android/app/src/main/assets/
+cp -r audio android/app/src/main/assets/
 cd android && gradle assembleDebug
 ```
 
