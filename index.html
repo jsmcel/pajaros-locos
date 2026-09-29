@@ -419,6 +419,7 @@ const S = {
   mudo: false,
   // juego
   motor: null, cuerpos: [], particulas: [], aves: [], huevos: [],
+  trayectoria: [], aveTrayectoria: null,
   pajarosUsados: 0, tirando: false, aim: null, calma: 0, finPuesto: false,
   sacudida: 0, tiempo: 0,
   // equipo de pájaros y campaña
@@ -1279,6 +1280,7 @@ function creaMundo(){
   S.motor = Engine.create();
   S.motor.gravity.y = 1.7;
   S.cuerpos = []; S.particulas = []; S.aves = []; S.huevos = [];
+  S.trayectoria = []; S.aveTrayectoria = null;
   S.pajarosUsados = 0; S.finPuesto=false; S.calma=0; S.aim=null; S.tirando=false;
 
   const est = { isStatic:true, friction:.9, restitution:.05 };
@@ -1425,6 +1427,7 @@ function creaAve(id,x,y,vx,vy,cria){
 }
 function quitaAve(b){
   const i=S.aves.indexOf(b); if(i<0) return;
+  if(b===S.aveTrayectoria){ registraTrayectoria(true); S.aveTrayectoria=null; }
   chispas(b.position.x,b.position.y,'#ffffff',10,5);
   Composite.remove(S.motor.world,b); S.aves.splice(i,1);
 }
@@ -1441,10 +1444,37 @@ function estela(P,color){ chispas(P.x,P.y,color,14,7); }
 
 function lanzaPajaro(vx,vy){
   const id = S.equipo[S.pajarosUsados] || S.equipo[0] || 'rojo';
-  creaAve(id, S.aim.x, S.aim.y, vx, vy, false);
+  S.trayectoria = [];
+  S.aveTrayectoria = creaAve(id, S.aim.x, S.aim.y, vx, vy, false);
+  registraTrayectoria();
   S.pajarosUsados++;
   SFX.lanza(); chispas(S.aim.x,S.aim.y,'#ffffff',8,4);
   refrescaMarcador(true);
+}
+
+// Posiciones reales, incluidos rebotes y poderes. Duran hasta el siguiente tiro.
+function registraTrayectoria(final=false){
+  const b=S.aveTrayectoria; if(!b) return;
+  const {x,y}=b.position, puntos=S.trayectoria, ultimo=puntos[puntos.length-1];
+  if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+  const distancia=ultimo ? Math.hypot(x-ultimo.x,y-ultimo.y) : Infinity;
+  if(distancia>=26 || (final && distancia>1)){
+    if(puntos.length<600) puntos.push({x,y});
+    else if(final) puntos[puntos.length-1]={x,y};
+  }
+}
+
+function pintaTrayectoria(){
+  ctx.save();
+  ctx.fillStyle='#ffe28a'; ctx.strokeStyle='rgba(95,61,18,.65)'; ctx.lineWidth=2;
+  for(const p of S.trayectoria){
+    ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  }
+  if(!S.aveTrayectoria && S.trayectoria.length){
+    const p=S.trayectoria[S.trayectoria.length-1];
+    ctx.beginPath(); ctx.arc(p.x,p.y,10,0,Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function usaPoder(m){
@@ -1560,6 +1590,7 @@ function pintaJugar(){
   if(S.sacudida>0){ ctx.translate((Math.random()-.5)*S.sacudida, (Math.random()-.5)*S.sacudida); S.sacudida*=0.88;
     if(S.sacudida<0.5) S.sacudida=0; }
   fondo(); suelo(); tirachinas(true);
+  pintaTrayectoria();
 
   const ave = getAve(S.equipo[S.pajarosUsados] || S.equipo[0] || 'rojo');
   const rr = ave.r || 26;
@@ -1667,7 +1698,7 @@ function pistaPoder(b, a){
    ============================================================ */
 function hayVentana(){ return !!document.querySelector('.capa.on'); }
 
-function bucle(){
+function bucle(programar=true){
   S.tiempo++;
   medirSiHaceFalta();
   ctx.setTransform(1,0,0,1,0,0);
@@ -1678,6 +1709,7 @@ function bucle(){
   if(S.modo==='jugar' && S.motor){
     if(!parado){
       Engine.update(S.motor, 1000/60);
+      registraTrayectoria();
       estadosAves();
       for(const b of S.cuerpos.slice()) if(b.position.y > H+400) destruye(b);
       for(const h of S.huevos.slice()) if(h.position.y > H+300) destruye(h);
@@ -1694,7 +1726,7 @@ function bucle(){
     pintaConstruir();
   }
   if(!parado) mueveParticulas();
-  requestAnimationFrame(bucle);
+  if(programar) requestAnimationFrame(bucle);
 }
 let ultimoW=0, ultimoH=0;
 function medirSiHaceFalta(){
@@ -1833,6 +1865,7 @@ function cambiaModo(m){
   } else {
     if(S.nivel){ S.nivel=0; S.piezas=cargaNivel(); cargaEquipo(); }  // salir de la campaña al editor propio
     S.modo='construir'; S.motor=null; S.cuerpos=[]; S.aves=[]; S.huevos=[]; S.particulas=[];
+    S.trayectoria=[]; S.aveTrayectoria=null;
     S.aim=null; S.tirando=false; S.finPuesto=false;
     document.getElementById('barraConstruir').style.display='flex';
     document.getElementById('barraJugar').style.display='none';
@@ -2331,12 +2364,17 @@ catch(e){ document.getElementById('capaAyuda').classList.add('on'); }
 window.render_game_to_text = ()=>JSON.stringify({
   coordenadas:'origen arriba a la izquierda; x hacia la derecha, y hacia abajo',
   modo:S.modo, nivel:S.nivel, pajarosUsados:S.pajarosUsados,
+  apuntando:S.tirando, aves:S.aves.map(b=>({tipo:b.datos.ave,x:b.position.x,y:b.position.y})),
+  trayectoria:{enVuelo:!!S.aveTrayectoria,puntos:S.trayectoria},
   piezas:S.piezas.map(p=>({tipo:p.t,x:p.x,y:p.y})),
   musica:{activada:MUS.on, reproduciendo:!musica.paused, tiempo:musica.currentTime,
     duracion:Number.isFinite(musica.duration)?musica.duration:null, bucle:musica.loop,
     error:musica.error?musica.error.code:null},
   efectos:!S.mudo,
 });
+window.advanceTime = ms=>{
+  for(let i=0;i<Math.max(1,Math.round(ms/(1000/60)));i++) bucle(false);
+};
 requestAnimationFrame(bucle);
 </script>
 </body>
